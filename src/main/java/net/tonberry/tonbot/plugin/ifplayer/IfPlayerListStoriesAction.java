@@ -12,7 +12,7 @@ import sx.blah.discord.util.EmbedBuilder;
 
 import java.util.List;
 
-public class ZmppListStoriesAction implements MessageReceivedAction {
+public class IfPlayerListStoriesAction implements MessageReceivedAction {
 
     private static final List<String> ROUTE = ImmutableList.of("if", "ls");
 
@@ -20,7 +20,7 @@ public class ZmppListStoriesAction implements MessageReceivedAction {
     private final StoryLibrary storyLibrary;
 
     @Inject
-    public ZmppListStoriesAction(@Prefix String prefix, StoryLibrary storyLibrary) {
+    public IfPlayerListStoriesAction(@Prefix String prefix, StoryLibrary storyLibrary) {
         this.prefix = Preconditions.checkNotNull(prefix, "prefix must be non-null.");
         this.storyLibrary = Preconditions.checkNotNull(storyLibrary, "storyLibrary must be non-null.");
     }

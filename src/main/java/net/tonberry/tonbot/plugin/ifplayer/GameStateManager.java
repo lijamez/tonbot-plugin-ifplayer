@@ -143,7 +143,6 @@ class GameStateManager implements SwingScreenModel, OutputStream {
 
                 //TODO: AFAIK, the VM can't handle multibyte characters. Better check for that.
                 vm.resumeWithCharInput((int) character);
-                //executeTurn(vm, this);
             }
         } catch (InterruptedException e) {
             // Oh no. Should never happen.
@@ -166,7 +165,6 @@ class GameStateManager implements SwingScreenModel, OutputStream {
         }
 
         vm.resumeWithSaveStream(saveFileOutputStream);
-        //executeTurn(vm, this);
     }
 
     @Override
@@ -191,7 +189,6 @@ class GameStateManager implements SwingScreenModel, OutputStream {
         }
 
         vm.resumeWithRestoreStream(saveFileInputStream);
-        //executeTurn(vm, this);
     }
 
     @Override
@@ -214,7 +211,6 @@ class GameStateManager implements SwingScreenModel, OutputStream {
 
             if (suppliedInput != null) {
                 vm.resumeWithLineInput(suppliedInput + "\n");
-                //executeTurn(vm, this);
             }
         } catch (InterruptedException e) {
             // Oh no. Should never happen.

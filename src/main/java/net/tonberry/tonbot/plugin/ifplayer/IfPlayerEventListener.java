@@ -5,14 +5,14 @@ import com.google.inject.Inject;
 import com.tonberry.tonbot.common.EventDispatcher;
 import com.tonberry.tonbot.common.Prefix;
 
-public class ZmppEventListener extends EventDispatcher {
+public class IfPlayerEventListener extends EventDispatcher {
 
     @Inject
-    public ZmppEventListener(
+    public IfPlayerEventListener(
             @Prefix String prefix,
-            ZmppListStoriesAction listStoriesAction,
-            ZmppPlayStoryAction playStoryAction,
-            ZmppStopStoryAction stopStoryAction) {
+            IfPlayerListStoriesAction listStoriesAction,
+            IfPlayStoryAction playStoryAction,
+            IfPlayerStopStoryAction stopStoryAction) {
         super(prefix, ImmutableSet.of(listStoriesAction, playStoryAction, stopStoryAction));
     }
 }

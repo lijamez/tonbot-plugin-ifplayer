@@ -11,13 +11,13 @@ import com.tonberry.tonbot.common.Prefix;
 
 import java.io.File;
 
-class ZmppModule extends AbstractModule {
+class IfPlayerModule extends AbstractModule {
 
     private final String prefix;
     private final File storyDir;
     private final File saveDir;
 
-    public ZmppModule(String prefix, File storyDir, File saveDir) {
+    public IfPlayerModule(String prefix, File storyDir, File saveDir) {
         this.prefix = Preconditions.checkNotNull(prefix, "prefix must be non-null.");
 
         Preconditions.checkNotNull(storyDir, "storyDir must be non-null.");
@@ -41,16 +41,16 @@ class ZmppModule extends AbstractModule {
     @Provides
     @Singleton
     PluginResources pluginResources(
-            ZmppEventListener zmppEventListener,
-            ZmppSendLineListener sendLineListener) {
+            IfPlayerEventListener ifPlayerEventListener,
+            IfPlayerSendLineListener sendLineListener) {
 
         return PluginResources.builder()
-                .name("Z-Machine Interpreter")
+                .name("Interactive Fiction Player")
                 .shortSummary("Play Interactive Fiction")
                 .usageDescription("``" + prefix + " if ls``    lists all of the available stories\n"
                         + "``" + prefix + " if play <STORY NAME>``    plays a story\n"
                         + "``" + prefix + " if stop``    stops playing the story")
-                .eventListeners(ImmutableSet.of(zmppEventListener, sendLineListener))
+                .eventListeners(ImmutableSet.of(ifPlayerEventListener, sendLineListener))
                 .build();
     }
 }

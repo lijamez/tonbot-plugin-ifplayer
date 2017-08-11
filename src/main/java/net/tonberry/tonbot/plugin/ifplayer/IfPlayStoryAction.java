@@ -14,16 +14,16 @@ import sx.blah.discord.util.MissingPermissionsException;
 
 import java.util.List;
 
-public class ZmppPlayStoryAction implements MessageReceivedAction {
+public class IfPlayStoryAction implements MessageReceivedAction {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ZmppPlayStoryAction.class);
+    private static final Logger LOG = LoggerFactory.getLogger(IfPlayStoryAction.class);
 
     private static final List<String> ROUTE = ImmutableList.of("if", "play");
 
     private final SessionManager sessionManager;
 
     @Inject
-    public ZmppPlayStoryAction(SessionManager sessionManager) {
+    public IfPlayStoryAction(SessionManager sessionManager) {
         this.sessionManager = Preconditions.checkNotNull(sessionManager, "sessionManager must be non-null.");
     }
 

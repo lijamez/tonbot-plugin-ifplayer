@@ -13,16 +13,16 @@ import sx.blah.discord.util.MissingPermissionsException;
 
 import java.util.List;
 
-public class ZmppStopStoryAction implements MessageReceivedAction {
+public class IfPlayerStopStoryAction implements MessageReceivedAction {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ZmppStopStoryAction.class);
+    private static final Logger LOG = LoggerFactory.getLogger(IfPlayerStopStoryAction.class);
 
     private static final List<String> ROUTE = ImmutableList.of("if", "stop");
 
     private final SessionManager sessionManager;
 
     @Inject
-    public ZmppStopStoryAction(SessionManager sessionManager) {
+    public IfPlayerStopStoryAction(SessionManager sessionManager) {
         this.sessionManager = Preconditions.checkNotNull(sessionManager, "sessionManager must be non-null.");
     }
 
