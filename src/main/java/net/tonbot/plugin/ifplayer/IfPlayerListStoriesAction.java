@@ -1,4 +1,4 @@
-package net.tonberry.tonbot.plugin.ifplayer;
+package net.tonbot.plugin.ifplayer;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;

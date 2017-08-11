@@ -1,4 +1,4 @@
-package net.tonberry.tonbot.plugin.ifplayer;
+package net.tonbot.plugin.ifplayer;
 
 import com.google.inject.BindingAnnotation;
 
@@ -10,5 +10,5 @@ import java.lang.annotation.Target;
 @BindingAnnotation
 @Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface SaveDir {
+public @interface StoryDir {
 }

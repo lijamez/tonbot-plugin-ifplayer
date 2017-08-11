@@ -1,4 +1,4 @@
-package net.tonberry.tonbot.plugin.ifplayer;
+package net.tonbot.plugin.ifplayer;
 
 import com.google.inject.Guice;
 import com.tonberry.tonbot.common.PluginResources;

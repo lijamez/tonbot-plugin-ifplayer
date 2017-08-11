@@ -1,4 +1,4 @@
-package net.tonberry.tonbot.plugin.ifplayer;
+package net.tonbot.plugin.ifplayer;
 
 import com.tonberry.tonbot.common.TonbotBusinessException;
 import sx.blah.discord.handle.obj.IChannel;

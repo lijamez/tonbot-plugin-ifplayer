@@ -1,4 +1,4 @@
-package net.tonberry.tonbot.plugin.ifplayer;
+package net.tonbot.plugin.ifplayer;
 
 import lombok.Builder;
 import lombok.Data;

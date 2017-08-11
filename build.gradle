@@ -1,4 +1,4 @@
-group 'net.tonberry.tonbot'
+group 'net.tonbot'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'java'

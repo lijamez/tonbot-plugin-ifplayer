@@ -1,4 +1,4 @@
-package net.tonberry.tonbot.plugin.ifplayer;
+package net.tonbot.plugin.ifplayer;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
