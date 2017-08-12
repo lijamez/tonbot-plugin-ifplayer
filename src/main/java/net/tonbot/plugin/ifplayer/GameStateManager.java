@@ -23,6 +23,8 @@ class GameStateManager implements SwingScreenModel, OutputStream {
     private static final Logger LOG = LoggerFactory.getLogger(GameStateManager.class);
 
     private static final int MAX_EXPECTED_WINDOWS = 2;
+    // Window 0 is below window 1
+    private static final int[] WINDOW_ORDER = new int[] {1, 0};
 
     private List<StringBuffer> windows;
     private int activeWindow;
@@ -335,12 +337,17 @@ class GameStateManager implements SwingScreenModel, OutputStream {
 
     private void sendWindowsToChannel() {
         StringBuffer discordMessageBuffer = new StringBuffer();
-        for (StringBuffer windowBuffer : this.windows) {
-            discordMessageBuffer.append("```");
-            discordMessageBuffer.append(windowBuffer);
-            discordMessageBuffer.append("```");
 
-            windowBuffer.setLength(0);
+        for (int windowIndex : WINDOW_ORDER) {
+            StringBuffer windowBuffer = this.windows.get(windowIndex);
+
+            if (windowBuffer.length() != 0) {
+                discordMessageBuffer.append("```");
+                discordMessageBuffer.append(windowBuffer);
+                discordMessageBuffer.append("```");
+
+                windowBuffer.setLength(0);
+            }
         }
 
         BotUtils.sendMessage(channel, discordMessageBuffer.toString());
