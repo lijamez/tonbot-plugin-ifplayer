@@ -251,12 +251,12 @@ class GameStateManager implements SwingScreenModel, OutputStream {
 
     @Override
     public void updateStatusLine() {
-        LOG.debug("activeWindow called.");
+        LOG.debug("updateStatusLine called.");
     }
 
     @Override
     public void splitWindow(int lines) {
-        LOG.debug("activeWindow called with lines {}", lines);
+        LOG.debug("splitWindow called with lines {}", lines);
     }
 
     @Override
@@ -299,7 +299,7 @@ class GameStateManager implements SwingScreenModel, OutputStream {
 
     @Override
     public void bufferMode(int flag) {
-        LOG.debug("cancelInput called with flag {}", flag);
+        LOG.debug("bufferMode called with flag {}", flag);
     }
 
     @Override
