@@ -12,7 +12,7 @@ import com.tonberry.tonbot.common.TonbotPluginArgs;
 import java.io.File;
 import java.util.Set;
 
-class IfPlayerPlugin extends TonbotPlugin {
+public class IfPlayerPlugin extends TonbotPlugin {
 
     private static final File STORY_DIR = new File("/Users/lijamez/zmpp-plugin/stories/");
     private static final File SAVES_DIR = new File("/Users/lijamez/zmpp-plugin/saves/");
