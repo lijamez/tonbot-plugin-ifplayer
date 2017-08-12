@@ -13,12 +13,9 @@ import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedE
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.util.MissingPermissionsException;
 
-import java.util.List;
-import java.util.Optional;
+class IfPlayerPlayStoryActivity implements Activity {
 
-class IfPlayerPlayStoryAction implements Activity {
-
-    private static final Logger LOG = LoggerFactory.getLogger(IfPlayerPlayStoryAction.class);
+    private static final Logger LOG = LoggerFactory.getLogger(IfPlayerPlayStoryActivity.class);
 
     private static final ActivityDescriptor ACTIVITY_DESCRIPTOR = ActivityDescriptor.builder()
             .route(ImmutableList.of("if", "play"))
@@ -29,12 +26,12 @@ class IfPlayerPlayStoryAction implements Activity {
     private final SessionManager sessionManager;
 
     @Inject
-    public IfPlayerPlayStoryAction(SessionManager sessionManager) {
+    public IfPlayerPlayStoryActivity(SessionManager sessionManager) {
         this.sessionManager = Preconditions.checkNotNull(sessionManager, "sessionManager must be non-null.");
     }
 
     @Override
-    public ActivityDescriptor getActivityDescriptor() {
+    public ActivityDescriptor getDescriptor() {
         return ACTIVITY_DESCRIPTOR;
     }
 

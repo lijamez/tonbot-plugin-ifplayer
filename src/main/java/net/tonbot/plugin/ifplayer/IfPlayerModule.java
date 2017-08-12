@@ -43,7 +43,7 @@ class IfPlayerModule extends AbstractModule {
     @Singleton
     Set<Activity> activities(
             IfPlayerListStoriesActivity listStoriesActivity,
-            IfPlayerPlayStoryAction playStoryActivity,
+            IfPlayerPlayStoryActivity playStoryActivity,
             IfPlayerStopStoryActivity stopStoryActivity) {
         return ImmutableSet.of(listStoriesActivity, playStoryActivity, stopStoryActivity);
     }

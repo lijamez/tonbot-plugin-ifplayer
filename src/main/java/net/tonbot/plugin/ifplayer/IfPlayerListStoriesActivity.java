@@ -31,7 +31,7 @@ class IfPlayerListStoriesActivity implements Activity {
     }
 
     @Override
-    public ActivityDescriptor getActivityDescriptor() {
+    public ActivityDescriptor getDescriptor() {
         return ACTIVITY_DESCRIPTOR;
     }
 
