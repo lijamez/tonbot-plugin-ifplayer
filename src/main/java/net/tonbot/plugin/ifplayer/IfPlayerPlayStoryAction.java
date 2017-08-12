@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.tonberry.tonbot.common.Activity;
+import com.tonberry.tonbot.common.ActivityDescriptor;
 import com.tonberry.tonbot.common.BotUtils;
 import com.tonberry.tonbot.common.TonbotException;
 import org.slf4j.Logger;
@@ -19,7 +20,11 @@ class IfPlayerPlayStoryAction implements Activity {
 
     private static final Logger LOG = LoggerFactory.getLogger(IfPlayerPlayStoryAction.class);
 
-    private static final List<String> ROUTE = ImmutableList.of("if", "play");
+    private static final ActivityDescriptor ACTIVITY_DESCRIPTOR = ActivityDescriptor.builder()
+            .route(ImmutableList.of("if", "play"))
+            .parameters(ImmutableList.of("story name"))
+            .description("Play a story")
+            .build();
 
     private final SessionManager sessionManager;
 
@@ -29,18 +34,8 @@ class IfPlayerPlayStoryAction implements Activity {
     }
 
     @Override
-    public List<String> getRoute() {
-        return ROUTE;
-    }
-
-    @Override
-    public String getDescription() {
-        return "Play a story";
-    }
-
-    @Override
-    public Optional<String> getUsage() {
-        return Optional.empty();
+    public ActivityDescriptor getActivityDescriptor() {
+        return ACTIVITY_DESCRIPTOR;
     }
 
     @Override

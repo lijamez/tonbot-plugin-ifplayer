@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.tonberry.tonbot.common.Activity;
+import com.tonberry.tonbot.common.ActivityDescriptor;
 import com.tonberry.tonbot.common.BotUtils;
 import com.tonberry.tonbot.common.Prefix;
 import org.apache.commons.lang3.StringUtils;
@@ -15,7 +16,10 @@ import java.util.Optional;
 
 class IfPlayerListStoriesActivity implements Activity {
 
-    private static final List<String> ROUTE = ImmutableList.of("if", "ls");
+    private static final ActivityDescriptor ACTIVITY_DESCRIPTOR = ActivityDescriptor.builder()
+            .route(ImmutableList.of("if", "ls"))
+            .description("Lists the available stories for play.")
+            .build();
 
     private final String prefix;
     private final StoryLibrary storyLibrary;
@@ -27,18 +31,8 @@ class IfPlayerListStoriesActivity implements Activity {
     }
 
     @Override
-    public List<String> getRoute() {
-        return ROUTE;
-    }
-
-    @Override
-    public String getDescription() {
-        return "Lists the available stories for play.";
-    }
-
-    @Override
-    public Optional<String> getUsage() {
-        return Optional.empty();
+    public ActivityDescriptor getActivityDescriptor() {
+        return ACTIVITY_DESCRIPTOR;
     }
 
     @Override
