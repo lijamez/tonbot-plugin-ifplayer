@@ -205,7 +205,7 @@ class GameStateManager implements SwingScreenModel, OutputStream {
 
     @Override
     public void flush() {
-
+        LOG.debug("flush called.");
     }
 
     @Override
@@ -239,22 +239,24 @@ class GameStateManager implements SwingScreenModel, OutputStream {
 
     @Override
     public InputStream keyboardStream() {
+        LOG.debug("keyboardStream called.");
         return null;
     }
 
     @Override
     public ScreenModelWindow activeWindow() {
+        LOG.debug("activeWindow called.");
         return null;
     }
 
     @Override
     public void updateStatusLine() {
-
+        LOG.debug("activeWindow called.");
     }
 
     @Override
     public void splitWindow(int lines) {
-
+        LOG.debug("activeWindow called with lines {}", lines);
     }
 
     @Override
@@ -265,11 +267,12 @@ class GameStateManager implements SwingScreenModel, OutputStream {
 
     @Override
     public void setCursorPosition(int line, int column) {
-
+        LOG.debug("setCursorPosition called with line {} and column {}", line, column);
     }
 
     @Override
     public Tuple2<Object, Object> cursorPosition() {
+        LOG.debug("cursorPosition called");
         return null;
     }
 
@@ -280,46 +283,48 @@ class GameStateManager implements SwingScreenModel, OutputStream {
 
     @Override
     public void initUI() {
-
+        LOG.debug("initUI called");
     }
 
     @Override
     public void flushInterruptOutput() {
-
+        LOG.debug("flushInterruptOutput called");
     }
 
     @Override
     public void cancelInput() {
-
+        LOG.debug("cancelInput called");
     }
 
     @Override
     public void bufferMode(int flag) {
-
+        LOG.debug("cancelInput called with flag {}", flag);
     }
 
     @Override
     public void eraseWindow(int windowId) {
-
+        LOG.debug("eraseWindow called with windowId {}", windowId);
     }
 
     @Override
     public void eraseLine(int value) {
-
+        LOG.debug("eraseLine called with value {}", value);
     }
 
     @Override
     public void setTextStyle(int style) {
-
+        LOG.debug("setTextStyle called with style {}", style);
     }
 
     @Override
     public int setFont(int font) {
+        LOG.debug("setFont called with font {}", font);
         return 0;
     }
 
     @Override
     public void setColour(int foreground, int background, int window) {
+        LOG.debug("setColour called with foreground {}, background {}, window {}", foreground, background, window);
 
     }
 
@@ -348,6 +353,7 @@ class GameStateManager implements SwingScreenModel, OutputStream {
 
                 windowBuffer.setLength(0);
             }
+            System.out.println("OMG It WOKRS");
         }
 
         BotUtils.sendMessage(channel, discordMessageBuffer.toString());
