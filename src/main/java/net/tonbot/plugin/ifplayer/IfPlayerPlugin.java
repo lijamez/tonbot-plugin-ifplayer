@@ -1,5 +1,6 @@
 package net.tonbot.plugin.ifplayer;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -8,20 +9,34 @@ import com.google.inject.TypeLiteral;
 import com.tonberry.tonbot.common.Activity;
 import com.tonberry.tonbot.common.TonbotPlugin;
 import com.tonberry.tonbot.common.TonbotPluginArgs;
+import com.tonberry.tonbot.common.TonbotTechnicalFault;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Set;
 
 public class IfPlayerPlugin extends TonbotPlugin {
-
-    private static final File STORY_DIR = new File("/Users/lijamez/zmpp-plugin/stories/");
-    private static final File SAVES_DIR = new File("/Users/lijamez/zmpp-plugin/saves/");
 
     private Injector injector;
 
     public IfPlayerPlugin(TonbotPluginArgs tonbotPluginArgs) {
         super(tonbotPluginArgs);
-        this.injector = Guice.createInjector(new IfPlayerModule(tonbotPluginArgs.getPrefix(), STORY_DIR, SAVES_DIR));
+
+        File configFile = tonbotPluginArgs.getConfigFile()
+                .orElseThrow(() -> new TonbotTechnicalFault("Config file does not exist."));
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        try {
+            Config config = objectMapper.readValue(configFile, Config.class);
+
+            File storyDir = new File(config.getStoriesDir());
+            File savesDir = new File(config.getSavesDir());
+
+            this.injector = Guice.createInjector(new IfPlayerModule(tonbotPluginArgs.getPrefix(), storyDir, savesDir));
+        } catch (IOException e) {
+            throw new RuntimeException("Could not read configuration file.", e);
+        }
     }
 
     @Override
