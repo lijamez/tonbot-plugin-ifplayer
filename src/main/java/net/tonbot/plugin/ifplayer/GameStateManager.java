@@ -261,6 +261,7 @@ class GameStateManager implements SwingScreenModel, OutputStream {
 
     @Override
     public void setWindow(int windowId) {
+        LOG.debug("setWindow called with windowId {}", windowId);
         Preconditions.checkArgument(windowId < MAX_EXPECTED_WINDOWS, "Unexpected windowId received.");
         this.activeWindow = windowId;
     }
