@@ -25,7 +25,7 @@ configurations {
 
 dependencies {
 
-    compile 'com.github.lijamez:tonbot-common:-SNAPSHOT'
+    compile 'com.github.lijamez:tonbot-common:master-SNAPSHOT'
 
     extraLibs files('lib/zcode-assembly-0.1-SNAPSHOT.jar')
 

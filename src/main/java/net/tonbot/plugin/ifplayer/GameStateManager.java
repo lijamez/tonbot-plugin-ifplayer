@@ -353,7 +353,6 @@ class GameStateManager implements SwingScreenModel, OutputStream {
 
                 windowBuffer.setLength(0);
             }
-            System.out.println("OMG It WOKRS");
         }
 
         BotUtils.sendMessage(channel, discordMessageBuffer.toString());
