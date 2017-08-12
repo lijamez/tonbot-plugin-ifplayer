@@ -52,6 +52,9 @@ class GameStateManager implements SwingScreenModel, OutputStream {
         this.capabilities = JavaConversions.asScalaBuffer(caps).toList();
 
         this.windows = new ArrayList<>(MAX_EXPECTED_WINDOWS);
+        for (int i = 0; i < MAX_EXPECTED_WINDOWS; i++) {
+            this.windows.add(i, new StringBuffer());
+        }
         this.activeWindow = 0;
 
         this.vm = new Machine();
