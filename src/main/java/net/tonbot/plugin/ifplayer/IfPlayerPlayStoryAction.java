@@ -3,8 +3,8 @@ package net.tonbot.plugin.ifplayer;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
+import com.tonberry.tonbot.common.Activity;
 import com.tonberry.tonbot.common.BotUtils;
-import com.tonberry.tonbot.common.MessageReceivedAction;
 import com.tonberry.tonbot.common.TonbotException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,23 +13,34 @@ import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.util.MissingPermissionsException;
 
 import java.util.List;
+import java.util.Optional;
 
-public class IfPlayStoryAction implements MessageReceivedAction {
+class IfPlayerPlayStoryAction implements Activity {
 
-    private static final Logger LOG = LoggerFactory.getLogger(IfPlayStoryAction.class);
+    private static final Logger LOG = LoggerFactory.getLogger(IfPlayerPlayStoryAction.class);
 
     private static final List<String> ROUTE = ImmutableList.of("if", "play");
 
     private final SessionManager sessionManager;
 
     @Inject
-    public IfPlayStoryAction(SessionManager sessionManager) {
+    public IfPlayerPlayStoryAction(SessionManager sessionManager) {
         this.sessionManager = Preconditions.checkNotNull(sessionManager, "sessionManager must be non-null.");
     }
 
     @Override
     public List<String> getRoute() {
         return ROUTE;
+    }
+
+    @Override
+    public String getDescription() {
+        return "Play a story";
+    }
+
+    @Override
+    public Optional<String> getUsage() {
+        return Optional.empty();
     }
 
     @Override

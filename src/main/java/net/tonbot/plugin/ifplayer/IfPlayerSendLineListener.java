@@ -6,7 +6,7 @@ import com.tonberry.tonbot.common.Prefix;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 
-public class IfPlayerSendLineListener {
+class IfPlayerSendLineListener {
 
     private final String prefix;
     private final SessionManager sessionManager;

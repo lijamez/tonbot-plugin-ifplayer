@@ -3,8 +3,8 @@ package net.tonbot.plugin.ifplayer;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
+import com.tonberry.tonbot.common.Activity;
 import com.tonberry.tonbot.common.BotUtils;
-import com.tonberry.tonbot.common.MessageReceivedAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
@@ -12,23 +12,34 @@ import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.util.MissingPermissionsException;
 
 import java.util.List;
+import java.util.Optional;
 
-public class IfPlayerStopStoryAction implements MessageReceivedAction {
+class IfPlayerStopStoryActivity implements Activity {
 
-    private static final Logger LOG = LoggerFactory.getLogger(IfPlayerStopStoryAction.class);
+    private static final Logger LOG = LoggerFactory.getLogger(IfPlayerStopStoryActivity.class);
 
     private static final List<String> ROUTE = ImmutableList.of("if", "stop");
 
     private final SessionManager sessionManager;
 
     @Inject
-    public IfPlayerStopStoryAction(SessionManager sessionManager) {
+    public IfPlayerStopStoryActivity(SessionManager sessionManager) {
         this.sessionManager = Preconditions.checkNotNull(sessionManager, "sessionManager must be non-null.");
     }
 
     @Override
     public List<String> getRoute() {
         return ROUTE;
+    }
+
+    @Override
+    public String getDescription() {
+        return "Stops playing the current story.";
+    }
+
+    @Override
+    public Optional<String> getUsage() {
+        return Optional.empty();
     }
 
     @Override

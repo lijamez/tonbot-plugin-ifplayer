@@ -5,6 +5,11 @@ apply plugin: 'java'
 
 sourceCompatibility = 1.8
 
+configurations.all {
+    // check for updates every build
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
 repositories {
     mavenCentral()
     jcenter() //This prevents issues with transitive dependencies
