@@ -12,17 +12,20 @@ import org.zmpp.zcode.InputStream;
 import org.zmpp.zcode.OutputStream;
 import scala.Tuple2;
 import scala.collection.JavaConversions;
-import scala.collection.immutable.List;
 import sx.blah.discord.handle.obj.IChannel;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.List;
 
 class GameStateManager implements SwingScreenModel, OutputStream {
 
     private static final Logger LOG = LoggerFactory.getLogger(GameStateManager.class);
 
-    private StringBuffer stringBuffer = new StringBuffer();
+    private static final int MAX_EXPECTED_WINDOWS = 2;
+
+    private List<StringBuffer> windows;
+    private int activeWindow;
 
     private final Machine vm;
 
@@ -30,7 +33,7 @@ class GameStateManager implements SwingScreenModel, OutputStream {
     private final Story story;
     private final File saveFile;
     private final IChannel channel;
-    private final List<CapabilityFlag> capabilities;
+    private final scala.collection.immutable.List<CapabilityFlag> capabilities;
 
     private boolean selected = true;
 
@@ -47,6 +50,9 @@ class GameStateManager implements SwingScreenModel, OutputStream {
 
         ArrayList<CapabilityFlag> caps = new ArrayList<>();
         this.capabilities = JavaConversions.asScalaBuffer(caps).toList();
+
+        this.windows = new ArrayList<>(MAX_EXPECTED_WINDOWS);
+        this.activeWindow = 0;
 
         this.vm = new Machine();
         Memory mem = story.getMemory();
@@ -115,6 +121,7 @@ class GameStateManager implements SwingScreenModel, OutputStream {
 
     @Override
     public void putChar(char c) {
+        StringBuffer stringBuffer = this.windows.get(this.activeWindow);
         stringBuffer.append(c);
     }
 
@@ -130,7 +137,7 @@ class GameStateManager implements SwingScreenModel, OutputStream {
 
     @Override
     public void readChar() {
-        sendBufferToChannel();
+        sendWindowsToChannel();
 
         try {
             synchronized (userInputBlocker) {
@@ -199,8 +206,8 @@ class GameStateManager implements SwingScreenModel, OutputStream {
     @Override
     public int readLine() {
         // When the machine requests line input, we assume that this is an indicator that
-        // we should send out whatever is in the buffer to the channel.
-        sendBufferToChannel();
+        // we should send out whatever is in the windows to the channel.
+        sendWindowsToChannel();
 
         // Now we need to block the thread until the user responds with something.
         // If we don't block, then the machine will exit.
@@ -247,7 +254,8 @@ class GameStateManager implements SwingScreenModel, OutputStream {
 
     @Override
     public void setWindow(int windowId) {
-
+        Preconditions.checkArgument(windowId < MAX_EXPECTED_WINDOWS, "Unexpected windowId received.");
+        this.activeWindow = windowId;
     }
 
     @Override
@@ -311,7 +319,7 @@ class GameStateManager implements SwingScreenModel, OutputStream {
     }
 
     @Override
-    public List<CapabilityFlag> capabilities() {
+    public scala.collection.immutable.List<CapabilityFlag> capabilities() {
         return capabilities;
     }
 
@@ -322,9 +330,17 @@ class GameStateManager implements SwingScreenModel, OutputStream {
         }
     }
 
-    private void sendBufferToChannel() {
-        BotUtils.sendMessage(channel, "```" + stringBuffer + "```");
-        stringBuffer = new StringBuffer();
+    private void sendWindowsToChannel() {
+        StringBuffer discordMessageBuffer = new StringBuffer();
+        for (StringBuffer windowBuffer : this.windows) {
+            discordMessageBuffer.append("```");
+            discordMessageBuffer.append(windowBuffer);
+            discordMessageBuffer.append("```");
+
+            windowBuffer.setLength(0);
+        }
+
+        BotUtils.sendMessage(channel, discordMessageBuffer.toString());
     }
 
     private void sendToChannel(String message, Exception e) {
