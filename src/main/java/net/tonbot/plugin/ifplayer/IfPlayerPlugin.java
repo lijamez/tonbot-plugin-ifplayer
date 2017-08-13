@@ -21,6 +21,7 @@ public class IfPlayerPlugin extends TonbotPlugin {
 
     public IfPlayerPlugin(TonbotPluginArgs tonbotPluginArgs) {
         super(tonbotPluginArgs);
+        System.out.println("HELLO!!!!!!!!!!!!!!!\n\n\n\n");
 
         File configFile = tonbotPluginArgs.getConfigFile()
                 .orElseThrow(() -> new TonbotTechnicalFault("Config file does not exist."));
