@@ -1,8 +1,5 @@
 package net.tonbot.plugin.ifplayer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
@@ -13,8 +10,6 @@ import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedE
 import sx.blah.discord.handle.obj.IChannel;
 
 class IfPlayerPlayStoryActivity implements Activity {
-
-    private static final Logger LOG = LoggerFactory.getLogger(IfPlayerPlayStoryActivity.class);
 
     private static final ActivityDescriptor ACTIVITY_DESCRIPTOR = ActivityDescriptor.builder()
             .route(ImmutableList.of("if", "play"))
