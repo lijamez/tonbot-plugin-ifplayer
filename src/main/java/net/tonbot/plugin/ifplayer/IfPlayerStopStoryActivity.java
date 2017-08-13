@@ -1,19 +1,18 @@
 package net.tonbot.plugin.ifplayer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.tonberry.tonbot.common.Activity;
 import com.tonberry.tonbot.common.ActivityDescriptor;
 import com.tonberry.tonbot.common.BotUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.util.MissingPermissionsException;
-
-import java.util.List;
-import java.util.Optional;
 
 class IfPlayerStopStoryActivity implements Activity {
 

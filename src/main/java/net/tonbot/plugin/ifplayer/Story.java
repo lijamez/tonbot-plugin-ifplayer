@@ -1,17 +1,19 @@
 package net.tonbot.plugin.ifplayer;
 
-import com.google.common.base.Preconditions;
-import com.tonberry.tonbot.common.TonbotTechnicalFault;
-import lombok.Getter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zmpp.base.DefaultMemory0;
 import org.zmpp.base.Memory;
 import org.zmpp.zcode.Machine;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import com.google.common.base.Preconditions;
+import com.tonberry.tonbot.common.TonbotTechnicalFault;
+
+import lombok.Getter;
 
 /**
  * A Z-code story.

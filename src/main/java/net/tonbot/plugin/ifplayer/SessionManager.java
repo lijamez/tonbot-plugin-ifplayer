@@ -1,9 +1,10 @@
 package net.tonbot.plugin.ifplayer;
 
-import com.tonberry.tonbot.common.TonbotBusinessException;
-import sx.blah.discord.handle.obj.IChannel;
-
 import java.util.Optional;
+
+import com.tonberry.tonbot.common.TonbotBusinessException;
+
+import sx.blah.discord.handle.obj.IChannel;
 
 interface SessionManager {
 

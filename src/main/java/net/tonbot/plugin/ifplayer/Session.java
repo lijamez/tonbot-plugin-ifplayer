@@ -1,10 +1,11 @@
 package net.tonbot.plugin.ifplayer;
 
+import java.io.File;
+
 import com.google.common.base.Preconditions;
+
 import lombok.Getter;
 import sx.blah.discord.handle.obj.IChannel;
-
-import java.io.File;
 
 class Session {
 

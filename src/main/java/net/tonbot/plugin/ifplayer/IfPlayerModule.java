@@ -1,5 +1,8 @@
 package net.tonbot.plugin.ifplayer;
 
+import java.io.File;
+import java.util.Set;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
@@ -8,9 +11,6 @@ import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import com.tonberry.tonbot.common.Activity;
 import com.tonberry.tonbot.common.Prefix;
-
-import java.io.File;
-import java.util.Set;
 
 class IfPlayerModule extends AbstractModule {
 

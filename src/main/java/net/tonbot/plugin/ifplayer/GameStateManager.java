@@ -1,22 +1,33 @@
 package net.tonbot.plugin.ifplayer;
 
-import com.google.common.base.Preconditions;
-import com.tonberry.tonbot.common.BotUtils;
-import com.tonberry.tonbot.common.TonbotTechnicalFault;
-import lombok.Getter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zmpp.base.Memory;
-import org.zmpp.zcode.*;
+import org.zmpp.zcode.CapabilityFlag;
 import org.zmpp.zcode.InputStream;
+import org.zmpp.zcode.Machine;
 import org.zmpp.zcode.OutputStream;
+import org.zmpp.zcode.ScreenModelWindow;
+import org.zmpp.zcode.SwingScreenModel;
+import org.zmpp.zcode.ZMachineRunStates;
+
+import com.google.common.base.Preconditions;
+import com.tonberry.tonbot.common.BotUtils;
+import com.tonberry.tonbot.common.TonbotTechnicalFault;
+
+import lombok.Getter;
 import scala.Tuple2;
 import scala.collection.JavaConversions;
 import sx.blah.discord.handle.obj.IChannel;
-
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 
 class GameStateManager implements SwingScreenModel, OutputStream {
 

@@ -1,13 +1,14 @@
 package net.tonbot.plugin.ifplayer;
 
-import com.google.common.base.Preconditions;
-import com.google.inject.Inject;
-import com.tonberry.tonbot.common.TonbotBusinessException;
-import sx.blah.discord.handle.obj.IChannel;
-
 import java.io.File;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.google.common.base.Preconditions;
+import com.google.inject.Inject;
+import com.tonberry.tonbot.common.TonbotBusinessException;
+
+import sx.blah.discord.handle.obj.IChannel;
 
 class SessionManagerImpl implements SessionManager {
 

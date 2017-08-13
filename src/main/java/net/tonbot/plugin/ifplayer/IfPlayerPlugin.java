@@ -1,5 +1,9 @@
 package net.tonbot.plugin.ifplayer;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Set;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Guice;
@@ -11,17 +15,12 @@ import com.tonberry.tonbot.common.TonbotPlugin;
 import com.tonberry.tonbot.common.TonbotPluginArgs;
 import com.tonberry.tonbot.common.TonbotTechnicalFault;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Set;
-
 public class IfPlayerPlugin extends TonbotPlugin {
 
     private Injector injector;
 
     public IfPlayerPlugin(TonbotPluginArgs tonbotPluginArgs) {
         super(tonbotPluginArgs);
-        System.out.println("HELLO!!!!!!!!!!!!!!!\n\n\n\n");
 
         File configFile = tonbotPluginArgs.getConfigFile()
                 .orElseThrow(() -> new TonbotTechnicalFault("Config file does not exist."));
