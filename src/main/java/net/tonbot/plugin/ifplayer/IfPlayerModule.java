@@ -44,7 +44,8 @@ class IfPlayerModule extends AbstractModule {
     Set<Activity> activities(
             IfPlayerListStoriesActivity listStoriesActivity,
             IfPlayerPlayStoryActivity playStoryActivity,
-            IfPlayerStopStoryActivity stopStoryActivity) {
-        return ImmutableSet.of(listStoriesActivity, playStoryActivity, stopStoryActivity);
+            IfPlayerStopStoryActivity stopStoryActivity,
+            IfPlayerControlsActivity controlsActivity) {
+        return ImmutableSet.of(listStoriesActivity, playStoryActivity, stopStoryActivity, controlsActivity);
     }
 }

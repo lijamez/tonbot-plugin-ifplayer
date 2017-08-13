@@ -8,6 +8,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,7 @@ import org.zmpp.zcode.SwingScreenModel;
 import org.zmpp.zcode.ZMachineRunStates;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import com.tonberry.tonbot.common.BotUtils;
 import com.tonberry.tonbot.common.TonbotTechnicalFault;
 
@@ -28,16 +30,54 @@ import lombok.Getter;
 import scala.Tuple2;
 import scala.collection.JavaConversions;
 import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.util.MissingPermissionsException;
 
 class GameStateManager implements SwingScreenModel, OutputStream {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GameStateManager.class);
-
+    private static final Logger LOG = LoggerFactory.getLogger(GameStateManager.class); 
+    
+    /**
+     * Since Discord only allows text input, we need to map them from a string to these keycodes.
+     */
+    private static final Map<String, Integer> CHAR_MAPPING = new ImmutableMap.Builder<String, Integer>()
+    		.put("<enter>", 13)
+    		.put("<return>", 13)
+    		.put("<esc>", 27)
+    		.put("<up>", 129)
+    		.put("<down>", 130)
+    		.put("<left>", 131)
+    		.put("<right>", 132)
+    		.put("<f1>", 133)
+    		.put("<f2>", 134)
+    		.put("<f3>", 135)
+    		.put("<f4>", 136)
+    		.put("<f5>", 137)
+    		.put("<f6>", 138)
+    		.put("<f7>", 139)
+    		.put("<f8>", 140)
+    		.put("<f9>", 141)
+    		.put("<f10>", 142)
+    		.put("<f11>", 143)
+    		.put("<f12>", 144)
+    		.put("<num0>", 145)
+    		.put("<num1>", 146)
+    		.put("<num2>", 147)
+    		.put("<num3>", 148)
+    		.put("<num4>", 149)
+    		.put("<num5>", 150)
+    		.put("<num6>", 151)
+    		.put("<num7>", 152)
+    		.put("<num8>", 153)
+    		.put("<num9>", 154)
+    		.build();
+    
     private static final int MAX_EXPECTED_WINDOWS = 2;
+    private static final int LOWER_WINDOW_INDEX = 0;
+    private static final int UPPER_WINDOW_INDEX = 1;
     // Window 0 is below window 1
-    private static final int[] WINDOW_ORDER = new int[] {1, 0};
+    private static final int[] WINDOW_ORDER = new int[] {UPPER_WINDOW_INDEX, LOWER_WINDOW_INDEX};
 
-    private List<StringBuffer> windows;
+    private List<CharacterMatrix> windows;
     private int activeWindow;
 
     private final Machine vm;
@@ -66,7 +106,7 @@ class GameStateManager implements SwingScreenModel, OutputStream {
 
         this.windows = new ArrayList<>(MAX_EXPECTED_WINDOWS);
         for (int i = 0; i < MAX_EXPECTED_WINDOWS; i++) {
-            this.windows.add(i, new StringBuffer());
+            this.windows.add(i, new DiscordAwareCharacterMatrix());
         }
         this.activeWindow = 0;
 
@@ -84,6 +124,12 @@ class GameStateManager implements SwingScreenModel, OutputStream {
         if (vmExecThread == null) {
             vmExecThread = new Thread(() -> stateManager.executeTurn(vm, stateManager));
             vmExecThread.start();
+            
+            try {
+                channel.changeTopic("Now playing: " + story.getName());
+            } catch (MissingPermissionsException e) {
+                LOG.debug("Couldn't get permissions on channel to change the topic.", e);
+            }
         }
     }
 
@@ -132,13 +178,22 @@ class GameStateManager implements SwingScreenModel, OutputStream {
             }
         } catch (Exception e) {
             LOG.error("GameStateManager has stopped in an unexpected way.", e);
+            sendToChannel("The player has crashed! :(", e);
+        } finally {
+        		try {
+            		channel.changeTopic("");
+        		} catch (MissingPermissionsException e) {
+                LOG.debug("Couldn't get permissions on channel to change the topic.", e);
+        		}
+
+            BotUtils.sendMessage(channel, "Game has stopped.");
         }
     }
 
     @Override
     public void putChar(char c) {
-        StringBuffer stringBuffer = this.windows.get(this.activeWindow);
-        stringBuffer.append(c);
+        CharacterMatrix charMatrix = this.windows.get(this.activeWindow);
+        charMatrix.write(c);
     }
 
     @Override
@@ -161,11 +216,16 @@ class GameStateManager implements SwingScreenModel, OutputStream {
             }
 
             if (suppliedInput != null) {
-                //TODO: What if suppliedInput is empty?
-                char character = suppliedInput.charAt(0);
+            		Integer specialChar = CHAR_MAPPING.get(suppliedInput);
+            		if (specialChar != null) {
+            			vm.resumeWithCharInput(specialChar);
+            		} else {
+            			// The supplyInput method guarantees that the supplied input is not empty.
+                    char character = suppliedInput.charAt(0);
 
-                //TODO: AFAIK, the VM can't handle multibyte characters. Better check for that.
-                vm.resumeWithCharInput((int) character);
+                    //TODO: AFAIK, the VM can't handle multibyte characters. Better check for that.
+                    vm.resumeWithCharInput((int) character);
+            		}
             }
         } catch (InterruptedException e) {
             // Oh no. Should never happen.
@@ -233,6 +293,8 @@ class GameStateManager implements SwingScreenModel, OutputStream {
             }
 
             if (suppliedInput != null) {
+            		//TODO: If the suppliedInput is too long, it could crash the machine with the following error:
+            		// java.lang.IllegalArgumentException: Attempt to write to static memory.
                 vm.resumeWithLineInput(suppliedInput + "\n");
             }
         } catch (InterruptedException e) {
@@ -267,11 +329,20 @@ class GameStateManager implements SwingScreenModel, OutputStream {
 
     @Override
     public void splitWindow(int lines) {
+    		// Splits the screen so that the upper window has the given number of lines: or, if this is zero,
+    	    // unsplits the screen again. In Version 3 (only) the upper window should be cleared after the split.
+	    	// More at: http://inform-fiction.org/zmachine/standards/z1point1/sect15.html
         LOG.debug("splitWindow called with lines {}", lines);
+        
+        if (story.getVersion() == 3) {
+        		// Clears the top window.
+        		this.windows.get(UPPER_WINDOW_INDEX).clear();
+        }
     }
 
     @Override
     public void setWindow(int windowId) {
+    		// Selects the given window for text output.
         LOG.debug("setWindow called with windowId {}", windowId);
         Preconditions.checkArgument(windowId < MAX_EXPECTED_WINDOWS, "Unexpected windowId received.");
         this.activeWindow = windowId;
@@ -279,13 +350,30 @@ class GameStateManager implements SwingScreenModel, OutputStream {
 
     @Override
     public void setCursorPosition(int line, int column) {
-        LOG.debug("setCursorPosition called with line {} and column {}", line, column);
+	    // When the upper window is selected, its cursor position can be moved with set_cursor. 
+	    // This position is given in characters in the form (row, column), with (1,1) at the top left. 
+	    // The opcode has no effect when the lower window is selected. It is illegal to move the cursor 
+	    // outside the current size of the upper window.
+		// http://inform-fiction.org/zmachine/standards/z1point1/sect08.html
+    	
+        LOG.debug("setCursorPosition called with line {}, column {}", line, column);
+        if (this.activeWindow == LOWER_WINDOW_INDEX) {
+        		return;
+        }
+        
+        CharacterMatrix charMatrix = this.windows.get(this.activeWindow);
+        charMatrix.setCursor(line - 1, column - 1);
     }
 
     @Override
     public Tuple2<Object, Object> cursorPosition() {
-        LOG.debug("cursorPosition called");
-        return null;
+        if (this.activeWindow == LOWER_WINDOW_INDEX) {
+        		throw new IllegalStateException("Cursor is not supported on the lower window.");
+        }
+        
+        CharacterMatrix charMatrix = this.windows.get(this.activeWindow);
+        int[] cursorPosition = charMatrix.getCursorPosition();
+        return new Tuple2<>(cursorPosition[0] + 1, cursorPosition[1] + 1);
     }
 
     @Override
@@ -345,7 +433,17 @@ class GameStateManager implements SwingScreenModel, OutputStream {
         return capabilities;
     }
 
+    /**
+     * Supplies an input to the state machine. Empty inputs will be ignored.
+     * @param input Input. Non-null.
+     */
     public void supplyInput(String input) {
+    		Preconditions.checkNotNull(input, "input must be non-null.");
+    		
+    		if (input.isEmpty()) {
+    			return;
+    		}
+    		
         this.suppliedInput = input;
         synchronized (userInputBlocker) {
             userInputBlocker.notify();
@@ -353,21 +451,28 @@ class GameStateManager implements SwingScreenModel, OutputStream {
     }
 
     private void sendWindowsToChannel() {
+    		//TODO: Split the message if it exceeds Discord's maximum characters per message (2000).
         StringBuffer discordMessageBuffer = new StringBuffer();
 
         for (int windowIndex : WINDOW_ORDER) {
-            StringBuffer windowBuffer = this.windows.get(windowIndex);
+            CharacterMatrix charMatrix = this.windows.get(windowIndex);
 
-            if (windowBuffer.length() != 0) {
+            String renderedMatrix = charMatrix.render().trim();
+            
+            if (renderedMatrix.length() != 0) {
+            		
                 discordMessageBuffer.append("```");
-                discordMessageBuffer.append(windowBuffer);
+                discordMessageBuffer.append(renderedMatrix);
                 discordMessageBuffer.append("```");
 
-                windowBuffer.setLength(0);
+                charMatrix.clear();
             }
         }
 
-        BotUtils.sendMessage(channel, discordMessageBuffer.toString());
+        String output = discordMessageBuffer.toString();
+        if (!output.isEmpty()) {
+        		BotUtils.sendMessage(channel, output);
+        }
     }
 
     private void sendToChannel(String message, Exception e) {

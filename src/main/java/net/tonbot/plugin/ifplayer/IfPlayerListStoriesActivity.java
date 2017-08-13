@@ -18,7 +18,7 @@ import sx.blah.discord.util.EmbedBuilder;
 class IfPlayerListStoriesActivity implements Activity {
 
     private static final ActivityDescriptor ACTIVITY_DESCRIPTOR = ActivityDescriptor.builder()
-            .route(ImmutableList.of("if", "ls"))
+            .route(ImmutableList.of("if", "list"))
             .description("Lists the available stories for play.")
             .build();
 
