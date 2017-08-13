@@ -71,6 +71,8 @@ class GameStateManager implements SwingScreenModel, OutputStream {
     		.put("<num9>", 154)
     		.build();
     
+    private static final int UPPER_WINDOW_WIDTH = 100;
+    
     private static final int MAX_EXPECTED_WINDOWS = 2;
     private static final int LOWER_WINDOW_INDEX = 0;
     private static final int UPPER_WINDOW_INDEX = 1;
@@ -105,14 +107,21 @@ class GameStateManager implements SwingScreenModel, OutputStream {
         this.capabilities = JavaConversions.asScalaBuffer(caps).toList();
 
         this.windows = new ArrayList<>(MAX_EXPECTED_WINDOWS);
-        for (int i = 0; i < MAX_EXPECTED_WINDOWS; i++) {
-            this.windows.add(i, new DiscordAwareCharacterMatrix());
-        }
+        
+        // The lower window should be unconstrained.
+        this.windows.add(LOWER_WINDOW_INDEX, new DiscordAwareCharacterMatrix());
+        
+        // The upper window should have a constant width. 
+        // The height, however, can change at any time.
+        this.windows.add(UPPER_WINDOW_INDEX, new DiscordAwareCharacterMatrix(UPPER_WINDOW_WIDTH, 0));
+        
         this.activeWindow = 0;
 
         this.vm = new Machine();
         Memory mem = story.getMemory();
         vm.init(mem, this);
+        
+        initUI();
     }
 
     /**
@@ -186,7 +195,7 @@ class GameStateManager implements SwingScreenModel, OutputStream {
                 LOG.debug("Couldn't get permissions on channel to change the topic.", e);
         		}
 
-            BotUtils.sendMessage(channel, "Game has stopped.");
+            BotUtils.sendMessage(channel, "Story '" + this.story.getName() + "' has stopped.");
         }
     }
 
@@ -284,7 +293,12 @@ class GameStateManager implements SwingScreenModel, OutputStream {
         // When the machine requests line input, we assume that this is an indicator that
         // we should send out whatever is in the windows to the channel.
         sendWindowsToChannel();
+        int maxChars = vm.readLineInfo().maxInputChars();
 
+        if (vm.version() <= 3) {
+            this.updateStatusLine();
+        }
+        
         // Now we need to block the thread until the user responds with something.
         // If we don't block, then the machine will exit.
         try {
@@ -293,9 +307,9 @@ class GameStateManager implements SwingScreenModel, OutputStream {
             }
 
             if (suppliedInput != null) {
-            		//TODO: If the suppliedInput is too long, it could crash the machine with the following error:
-            		// java.lang.IllegalArgumentException: Attempt to write to static memory.
-                vm.resumeWithLineInput(suppliedInput + "\n");
+            		// Trim the supplied input to maxChars-1 chars because we are going to add a newline immediately after.
+            	    String trimmedInput = suppliedInput.substring(0, Math.min(suppliedInput.length(), maxChars - 1));
+                vm.resumeWithLineInput(trimmedInput + "\n");
             }
         } catch (InterruptedException e) {
             // Oh no. Should never happen.
@@ -336,8 +350,10 @@ class GameStateManager implements SwingScreenModel, OutputStream {
         
         if (story.getVersion() == 3) {
         		// Clears the top window.
-        		this.windows.get(UPPER_WINDOW_INDEX).clear();
+        		this.windows.get(UPPER_WINDOW_INDEX).reset();
         }
+        
+        this.windows.get(UPPER_WINDOW_INDEX).setMaxHeight(lines);
     }
 
     @Override
@@ -358,6 +374,7 @@ class GameStateManager implements SwingScreenModel, OutputStream {
     	
         LOG.debug("setCursorPosition called with line {}, column {}", line, column);
         if (this.activeWindow == LOWER_WINDOW_INDEX) {
+            LOG.debug("setCursorPosition called with line {}, column {} on the lower window, which is not permitted", line, column);
         		return;
         }
         
@@ -384,6 +401,11 @@ class GameStateManager implements SwingScreenModel, OutputStream {
     @Override
     public void initUI() {
         LOG.debug("initUI called");
+        
+        vm.setFontSizeInUnits(1, 1);
+        
+        CharacterMatrix upperWindow = this.windows.get(UPPER_WINDOW_INDEX);
+	    vm.setScreenSizeInUnits(upperWindow.getMaxWidth(), upperWindow.getMaxHeight());
     }
 
     @Override
@@ -465,7 +487,7 @@ class GameStateManager implements SwingScreenModel, OutputStream {
                 discordMessageBuffer.append(renderedMatrix);
                 discordMessageBuffer.append("```");
 
-                charMatrix.clear();
+                charMatrix.reset();
             }
         }
 

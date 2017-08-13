@@ -46,7 +46,7 @@ public class IfPlayerPlugin extends TonbotPlugin {
 
     @Override
     public String getActionDescription() {
-        return "Play Interactive Fiction";
+        return "Play Interactive Fiction (Experimental)";
     }
 
     @Override
