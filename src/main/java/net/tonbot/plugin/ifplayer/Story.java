@@ -8,16 +8,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zmpp.base.DefaultMemory0;
 import org.zmpp.base.Memory;
-import org.zmpp.zcode.Machine;
+import org.zmpp.iff.BlorbData;
+import org.zmpp.iff.DefaultFormChunk;
 
 import com.google.common.base.Preconditions;
 import com.tonberry.tonbot.common.TonbotTechnicalFault;
 
-import lombok.Getter;
+import lombok.Data;
 
 /**
  * A Z-code story.
  */
+@Data
 class Story {
 
     private static final Logger LOG = LoggerFactory.getLogger(Story.class);
@@ -25,15 +27,20 @@ class Story {
     private static final byte MIN_VERSION = 1;
     private static final byte MAX_VERISON = 8;
 
-    @Getter
     private final String name;
-    private final byte[] data;
+    private final Memory memory;
 
-    private Story(String name, byte[] data) {
+    private Story(String name, Memory memory) {
         this.name = Preconditions.checkNotNull(name, "name must be non-null.");
-        this.data = Preconditions.checkNotNull(data, "data must be non-null.");
-
-        Preconditions.checkArgument(data.length > 0, "data must not be empty.");
+        this.memory = Preconditions.checkNotNull(memory, "memory must be non-null.");
+    }
+    
+    /**
+     * Gets the Z-Machine version.
+     * @return The Z-Machine version.
+     */
+    public int getVersion() {
+    		return memory.byteAt(0);
     }
 
     /**
@@ -60,30 +67,26 @@ class Story {
 
         LOG.debug("Successfully read {} bytes of story file.", fileBytes.length);
 
-        Story story = new Story(file.getName(), fileBytes);
+        byte version = fileBytes[0];
+        Story story = null;
+        
+        if (version >= MIN_VERSION && version <= MAX_VERISON) {
+        		// It's a regular Z-code file.
+        		story = new Story(file.getName(), new DefaultMemory0(fileBytes));
+        }
+        
+        if (BlorbData.isBlorbFile(fileBytes)) {
+        		// It's a blorb file.
+        		BlorbData blorbData = new BlorbData(new DefaultFormChunk(new DefaultMemory0(fileBytes)));
+        		if (blorbData.hasZcodeChunk()) {
+        			story = new Story(file.getName(), blorbData.zcodeData());
+        		}
+        }
 
-        Preconditions.checkArgument(story.getVersion() >= MIN_VERSION && story.getVersion() <= MAX_VERISON,
-                "File is not a story.");
+        if (story == null) {
+            throw new IllegalArgumentException("File is not supported.");
+        }
 
         return story;
-    }
-
-    /**
-     * Gets the version of the Z-machine that this story is intended to be run on.
-     * @return The z-code machine version.
-     */
-    public byte getVersion() {
-        // The first byte is the version.
-        // http://inform-fiction.org/zmachine/standards/z1point1/sect11.html
-        return data[0];
-    }
-
-    /**
-     * Gets the story as {@link Memory} for the {@link Machine}.
-     * @return {@link Memory}. Non-null.
-     */
-    public Memory getMemory() {
-        Memory mem = new DefaultMemory0(data);
-        return mem;
     }
 }
