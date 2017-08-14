@@ -1,6 +1,8 @@
 package net.tonbot.plugin.ifplayer;
 
+import java.io.File;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -38,7 +40,10 @@ class IfPlayerListStoriesActivity implements Activity {
 
     @Override
     public void enact(MessageReceivedEvent messageReceivedEvent, String args) {
-        List<String> storyNames = storyLibrary.listStories();
+        List<File> storyFiles = storyLibrary.listAllStories();
+        List<String> storyNames = storyFiles.stream()
+        		.map(File::getName)
+        		.collect(Collectors.toList());
 
         EmbedBuilder embedBuilder = new EmbedBuilder();
 

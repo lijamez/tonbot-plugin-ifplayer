@@ -1,6 +1,7 @@
 package net.tonbot.plugin.ifplayer;
 
 import java.io.File;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -52,8 +53,14 @@ class SessionManagerImpl implements SessionManager {
         Preconditions.checkNotNull(channel, "channel must be non-null.");
         Preconditions.checkNotNull(storyName, "storyName must be non-null.");
 
-        File storyFile = storyLibrary.getBestMatch(storyName)
-            .orElseThrow(() -> new TonbotBusinessException("There is no story with that name."));
+        List<File> foundFiles = storyLibrary.findStories(storyName);
+        if (foundFiles.isEmpty()) {
+        		throw new TonbotBusinessException("There is no story with that name.");
+        } else if (foundFiles.size() > 1) {
+        		throw new TonbotBusinessException("You're going to have to be more specific than that.");
+        }
+        
+        File storyFile = foundFiles.get(0);
 
         String channelId = channel.getStringID();
         String saveFileName = channelId + "-" + storyFile.getName() + ".save";
