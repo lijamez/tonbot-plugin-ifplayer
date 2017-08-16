@@ -3,9 +3,9 @@ package net.tonbot.plugin.ifplayer;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
-import com.tonberry.tonbot.common.Activity;
-import com.tonberry.tonbot.common.ActivityDescriptor;
 
+import net.tonbot.common.Activity;
+import net.tonbot.common.ActivityDescriptor;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
 

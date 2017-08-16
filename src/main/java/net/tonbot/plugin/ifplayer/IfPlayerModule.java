@@ -9,8 +9,9 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
-import com.tonberry.tonbot.common.Activity;
-import com.tonberry.tonbot.common.Prefix;
+
+import net.tonbot.common.Activity;
+import net.tonbot.common.Prefix;
 
 class IfPlayerModule extends AbstractModule {
 

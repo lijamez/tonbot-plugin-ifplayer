@@ -12,9 +12,9 @@ import org.zmpp.iff.BlorbData;
 import org.zmpp.iff.DefaultFormChunk;
 
 import com.google.common.base.Preconditions;
-import com.tonberry.tonbot.common.TonbotTechnicalFault;
 
 import lombok.Data;
+import net.tonbot.common.TonbotTechnicalFault;
 
 /**
  * A Z-code story.

@@ -1,10 +1,10 @@
 package net.tonbot.plugin.ifplayer;
 
 import com.google.common.collect.ImmutableList;
-import com.tonberry.tonbot.common.Activity;
-import com.tonberry.tonbot.common.ActivityDescriptor;
-import com.tonberry.tonbot.common.BotUtils;
 
+import net.tonbot.common.Activity;
+import net.tonbot.common.ActivityDescriptor;
+import net.tonbot.common.BotUtils;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.util.EmbedBuilder;
 

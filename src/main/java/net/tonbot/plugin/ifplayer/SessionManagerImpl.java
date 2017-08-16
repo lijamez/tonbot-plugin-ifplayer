@@ -7,8 +7,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
-import com.tonberry.tonbot.common.TonbotBusinessException;
 
+import net.tonbot.common.TonbotBusinessException;
 import sx.blah.discord.handle.obj.IChannel;
 
 class SessionManagerImpl implements SessionManager {

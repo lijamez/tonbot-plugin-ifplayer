@@ -23,10 +23,10 @@ import org.zmpp.zcode.ZMachineRunStates;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
-import com.tonberry.tonbot.common.BotUtils;
-import com.tonberry.tonbot.common.TonbotTechnicalFault;
 
 import lombok.Getter;
+import net.tonbot.common.BotUtils;
+import net.tonbot.common.TonbotTechnicalFault;
 import scala.Tuple2;
 import scala.collection.JavaConversions;
 import sx.blah.discord.handle.obj.IChannel;

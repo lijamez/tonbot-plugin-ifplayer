@@ -10,10 +10,11 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
-import com.tonberry.tonbot.common.Activity;
-import com.tonberry.tonbot.common.TonbotPlugin;
-import com.tonberry.tonbot.common.TonbotPluginArgs;
-import com.tonberry.tonbot.common.TonbotTechnicalFault;
+
+import net.tonbot.common.Activity;
+import net.tonbot.common.TonbotPlugin;
+import net.tonbot.common.TonbotPluginArgs;
+import net.tonbot.common.TonbotTechnicalFault;
 
 public class IfPlayerPlugin extends TonbotPlugin {
 
