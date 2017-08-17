@@ -30,7 +30,7 @@ class IfPlayerStopStoryActivity implements Activity {
     @Override
     public void enact(MessageReceivedEvent messageReceivedEvent, String args) {
         IChannel channel = messageReceivedEvent.getChannel();
-        SessionKey sessionKey = new SessionKey(channel.getStringID());
+        SessionKey sessionKey = new SessionKey(channel.getLongID());
 
         sessionManager.endSession(sessionKey);
     }

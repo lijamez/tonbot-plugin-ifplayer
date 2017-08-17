@@ -18,10 +18,14 @@ class IfPlayerPlayStoryActivity implements Activity {
             .build();
 
     private final SessionManager sessionManager;
+    private final SessionOrchestrator sessionOrchestrator;
 
     @Inject
-    public IfPlayerPlayStoryActivity(SessionManager sessionManager) {
+    public IfPlayerPlayStoryActivity(
+    		SessionManager sessionManager,
+    		SessionOrchestrator sessionOrchestrator) {
         this.sessionManager = Preconditions.checkNotNull(sessionManager, "sessionManager must be non-null.");
+        this.sessionOrchestrator = Preconditions.checkNotNull(sessionOrchestrator, "sessionOrchestrator must be non-null.");
     }
 
     @Override
@@ -32,8 +36,10 @@ class IfPlayerPlayStoryActivity implements Activity {
     @Override
     public void enact(MessageReceivedEvent messageReceivedEvent, String args) {
         IChannel channel = messageReceivedEvent.getChannel();
-        SessionKey sessionKey = new SessionKey(channel.getStringID());
+        SessionKey sessionKey = new SessionKey(channel.getLongID());
 
-        sessionManager.createSession(sessionKey, channel, args);
+        Session session = sessionManager.createSession(sessionKey, channel, args);
+        
+        sessionOrchestrator.advance(session, null, messageReceivedEvent.getChannel());
     }
 }

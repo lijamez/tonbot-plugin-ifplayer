@@ -38,6 +38,7 @@ class IfPlayerModule extends AbstractModule {
         bind(File.class).annotatedWith(SaveDir.class).toInstance(saveDir);
 
         bind(SessionManager.class).to(SessionManagerImpl.class).in(Scopes.SINGLETON);
+        bind(SessionOrchestrator.class).to(SessionOrchestratorImpl.class).in(Scopes.SINGLETON);
     }
 
     @Provides

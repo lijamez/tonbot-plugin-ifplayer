@@ -1,11 +1,16 @@
 package net.tonbot.plugin.ifplayer;
 
+import java.util.Optional;
+
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.vdurmont.emoji.EmojiParser;
 
+import net.tonbot.common.BotUtils;
 import net.tonbot.common.Prefix;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
@@ -14,13 +19,20 @@ import sx.blah.discord.util.MessageTokenizer;
 
 class IfPlayerSendLineListener {
 	
+	private static final Logger LOG = LoggerFactory.getLogger(IfPlayerSendLineListener.class);
+	
     private final String prefix;
     private final SessionManager sessionManager;
+    private final SessionOrchestrator sessionOrchestrator;
 
     @Inject
-    public IfPlayerSendLineListener(@Prefix String prefix, SessionManager sessionManager) {
+    public IfPlayerSendLineListener(
+    		@Prefix String prefix, 
+    		SessionManager sessionManager,
+    		SessionOrchestrator sessionOrchestrator) {
         this.prefix = Preconditions.checkNotNull(prefix, "prefix must be non-null.");
         this.sessionManager = Preconditions.checkNotNull(sessionManager, "sessionManager must be non-null.");
+        this.sessionOrchestrator = Preconditions.checkNotNull(sessionOrchestrator, "sessionOrchestrator must be non-null.");
     }
 
     @EventSubscriber
@@ -30,14 +42,14 @@ class IfPlayerSendLineListener {
     			return;
     		}
 
-        SessionKey sessionKey = new SessionKey(messageReceivedEvent.getChannel().getStringID());
+        SessionKey sessionKey = new SessionKey(messageReceivedEvent.getChannel().getLongID());
 
         Session session = sessionManager.getSession(sessionKey)
                 .orElse(null);
 
         if (session != null) {
-            String message = messageReceivedEvent.getMessage().getContent();
-            session.sendText(message);
+            String input = messageReceivedEvent.getMessage().getContent();
+            sessionOrchestrator.advance(session, input, messageReceivedEvent.getChannel());
         }
     }
     

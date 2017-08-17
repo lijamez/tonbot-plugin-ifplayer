@@ -11,12 +11,14 @@ class IfPlayerSendLineListenerTest extends Specification {
 	private static final String PREFIX = "t!"
 	
 	SessionManager sessionManager
+	SessionOrchestrator sessionOrchestrator
 	IfPlayerSendLineListener listener
 	
 	def setup() {
 		this.sessionManager = Mock(SessionManager);
+		this.sessionOrchestrator = Mock(SessionOrchestrator);
 		
-		this.listener = new IfPlayerSendLineListener(PREFIX, sessionManager);
+		this.listener = new IfPlayerSendLineListener(PREFIX, sessionManager, sessionOrchestrator);
 	}
 	
 	def "ignorable messages"(String message) {
@@ -70,10 +72,10 @@ class IfPlayerSendLineListenerTest extends Specification {
 		mockedMessage.getContent() >> message
 		
 		then:
-		mockedChannel.getStringID() >> "123"
+		mockedChannel.getLongID() >> 123
 		
 		then:
-		1 * sessionManager.getSession(new SessionKey("123")) >> Optional.empty()
+		1 * sessionManager.getSession(new SessionKey(123)) >> Optional.empty()
 		
 		then:
 		0 * _
@@ -97,9 +99,9 @@ class IfPlayerSendLineListenerTest extends Specification {
 		mockedMessage.getClient() >> mockedClient
 		mockedMessage.getContent() >> message
 		
-		1 * mockedChannel.getStringID() >> "123"
-		1 * sessionManager.getSession(new SessionKey("123")) >> Optional.of(mockedSession)
-		1 * mockedSession.sendText(message)
+		1 * mockedChannel.getLongID() >> 123
+		1 * sessionManager.getSession(new SessionKey(123)) >> Optional.of(mockedSession)
+		1 * sessionOrchestrator.advance(mockedSession, message, mockedChannel)
 		
 		then:
 		0 * _
