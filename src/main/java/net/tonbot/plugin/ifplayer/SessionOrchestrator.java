@@ -24,7 +24,7 @@ interface SessionOrchestrator {
 	void advance(String input, IChannel channel, String username);
 	
 	/**
-	 * Switches the save slot.
+	 * Switches the save slot. No-op if there is no session.
 	 * @param channel {@link IChannel}. Non-null.
 	 * @param saveSlot The desired save slot.
 	 */

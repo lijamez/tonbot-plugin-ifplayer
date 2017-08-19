@@ -21,19 +21,15 @@ class SessionOrchestratorImpl implements SessionOrchestrator {
 	private static final Logger LOG = LoggerFactory.getLogger(SessionOrchestratorImpl.class);
 
 	private final SessionManager sessionManager;
-	private final ScreenStateRenderer screenStateRenderer;
 	private final StoryLibrary storyLibrary;
 	private final SaveManager saveManager;
 
 	@Inject
 	public SessionOrchestratorImpl(
 			SessionManager sessionManager,
-			ScreenStateRenderer screenStateRenderer,
 			StoryLibrary storyLibrary,
 			SaveManager saveManager) {
 		this.sessionManager = Preconditions.checkNotNull(sessionManager, "sessionManager must be non-null.");
-		this.screenStateRenderer = Preconditions.checkNotNull(screenStateRenderer,
-				"screenStateRenderer must be non-null.");
 		this.storyLibrary = Preconditions.checkNotNull(storyLibrary, "storyLibrary must be non-null.");
 		this.saveManager = Preconditions.checkNotNull(saveManager, "saveManager must be non-null.");
 	}
@@ -57,7 +53,7 @@ class SessionOrchestratorImpl implements SessionOrchestrator {
 		Story story = Story.loadFrom(storyFile);
 
 		// End the current session, if any.
-		this.end(channel);
+		this.endInternal(channel);
 
 		// Create a new session.
 		SessionKey sessionKey = new SessionKey(channel.getLongID());
@@ -78,12 +74,13 @@ class SessionOrchestratorImpl implements SessionOrchestrator {
 		Preconditions.checkNotNull(username, "username must be non-null.");
 
 		Session session = getSession(channel);
-
+		
 		if (session == null) {
 			return;
 		}
 
 		GameMachine gameMachine = session.getGameMachine();
+		ScreenStateRenderer screenStateRenderer = session.getScreenStateRenderer();
 
 		Optional<ScreenState> screenState;
 		try {
@@ -116,6 +113,13 @@ class SessionOrchestratorImpl implements SessionOrchestrator {
 		}
 
 		Session session = getSession(channel);
+		if (session == null) {
+			BotUtils.sendMessage(channel, "You need to be playing a story first.");
+			return;
+		}
+		
+		ScreenStateRenderer screenStateRenderer = session.getScreenStateRenderer();
+		
 		SaveFile saveFile = saveManager.getSaveFile(channel.getLongID(), session.getGameMachine().getStory(),
 				slotNumber);
 		session.getGameMachine().setSaveFile(saveFile);
@@ -127,16 +131,16 @@ class SessionOrchestratorImpl implements SessionOrchestrator {
 	@Override
 	public boolean end(IChannel channel) {
 		Preconditions.checkNotNull(channel, "channel must be non-null.");
-
+		
 		Session session = getSession(channel);
 		
-		if (!this.endInternal(channel)) {
-			return false;
+		if (session != null) {
+			this.endInternal(channel);
+			BotUtils.sendMessage(channel, "Story '" + session.getGameMachine().getStory().getName() + "' has stopped.");
+			return true;
 		}
 		
-		screenStateRenderer.render(session, null, channel);
-		BotUtils.sendMessage(channel, "Story '" + session.getGameMachine().getStory().getName() + "' has stopped.");
-		return true;
+		return false;
 	}
 	
 	/**
@@ -146,13 +150,16 @@ class SessionOrchestratorImpl implements SessionOrchestrator {
 	 */
 	private boolean endInternal(IChannel channel) {
 		Session session = getSession(channel);
-
 		if (session == null) {
 			return false;
 		}
-
+		
 		session.getGameMachine().stop();
+		
+		ScreenStateRenderer screenStateRenderer = session.getScreenStateRenderer();
+		screenStateRenderer.render(session, null, channel);
 		sessionManager.removeSession(session.getSessionKey());
+
 		return true;
 	}
 

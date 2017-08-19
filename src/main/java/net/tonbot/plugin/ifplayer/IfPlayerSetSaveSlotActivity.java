@@ -39,11 +39,6 @@ class IfPlayerSetSaveSlotActivity implements Activity {
 	public void enact(MessageReceivedEvent messageReceivedEvent, String args) {
 		IChannel channel = messageReceivedEvent.getChannel();
 
-		if (!sessionOrchestrator.hasSession(channel)) {
-			BotUtils.sendMessage(channel, "You need to be playing a story first.");
-			return;
-		}
-
 		try {
 			int slotNumber = Integer.parseInt(args);
 

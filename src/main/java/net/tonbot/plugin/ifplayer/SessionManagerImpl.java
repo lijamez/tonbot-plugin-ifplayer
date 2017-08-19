@@ -55,7 +55,14 @@ class SessionManagerImpl implements SessionManager {
 
 		String sessionName = story.getName();
 
-		Session session = new Session(sessionKey, sessionName, story, saveFile, channel, onSavedCallback);
+		Session session = new Session(
+				sessionKey, 
+				sessionName, 
+				story, 
+				saveFile, 
+				channel, 
+				onSavedCallback,
+				new ScreenStateRenderer());
 
 		sessions.put(sessionKey, session);
 
