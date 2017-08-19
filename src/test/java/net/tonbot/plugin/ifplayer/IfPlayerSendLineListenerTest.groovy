@@ -10,15 +10,13 @@ class IfPlayerSendLineListenerTest extends Specification {
 
 	private static final String PREFIX = "t!"
 	
-	SessionManager sessionManager
 	SessionOrchestrator sessionOrchestrator
 	IfPlayerSendLineListener listener
 	
 	def setup() {
-		this.sessionManager = Mock(SessionManager);
 		this.sessionOrchestrator = Mock(SessionOrchestrator);
 		
-		this.listener = new IfPlayerSendLineListener(PREFIX, sessionManager, sessionOrchestrator);
+		this.listener = new IfPlayerSendLineListener(PREFIX, sessionOrchestrator);
 	}
 	
 	def "ignorable messages"(String message) {
@@ -36,7 +34,7 @@ class IfPlayerSendLineListenerTest extends Specification {
 		mockedMessage.getContent() >> message
 		
 		then:
-		0 * sessionManager._
+		0 * _
 		
 		where:
 		message                       | _
@@ -72,10 +70,7 @@ class IfPlayerSendLineListenerTest extends Specification {
 		mockedMessage.getContent() >> message
 		
 		then:
-		mockedChannel.getLongID() >> 123
-		
-		then:
-		1 * sessionManager.getSession(new SessionKey(123)) >> Optional.empty()
+		1 * sessionOrchestrator.advance(message, mockedChannel)
 		
 		then:
 		0 * _
@@ -88,8 +83,6 @@ class IfPlayerSendLineListenerTest extends Specification {
 		IDiscordClient mockedClient = Mock()
 		IChannel mockedChannel = Mock()
 		
-		Session mockedSession = Mock()
-		
 		when:
 		listener.onMessageReceived(mockedMre)
 		
@@ -99,9 +92,7 @@ class IfPlayerSendLineListenerTest extends Specification {
 		mockedMessage.getClient() >> mockedClient
 		mockedMessage.getContent() >> message
 		
-		1 * mockedChannel.getLongID() >> 123
-		1 * sessionManager.getSession(new SessionKey(123)) >> Optional.of(mockedSession)
-		1 * sessionOrchestrator.advance(mockedSession, message, mockedChannel)
+		1 * sessionOrchestrator.advance(message, mockedChannel)
 		
 		then:
 		0 * _

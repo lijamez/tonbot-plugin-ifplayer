@@ -1,16 +1,11 @@
 package net.tonbot.plugin.ifplayer;
 
-import java.util.Optional;
-
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.vdurmont.emoji.EmojiParser;
 
-import net.tonbot.common.BotUtils;
 import net.tonbot.common.Prefix;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
@@ -18,20 +13,15 @@ import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.util.MessageTokenizer;
 
 class IfPlayerSendLineListener {
-	
-	private static final Logger LOG = LoggerFactory.getLogger(IfPlayerSendLineListener.class);
-	
+
     private final String prefix;
-    private final SessionManager sessionManager;
     private final SessionOrchestrator sessionOrchestrator;
 
     @Inject
     public IfPlayerSendLineListener(
     		@Prefix String prefix, 
-    		SessionManager sessionManager,
     		SessionOrchestrator sessionOrchestrator) {
         this.prefix = Preconditions.checkNotNull(prefix, "prefix must be non-null.");
-        this.sessionManager = Preconditions.checkNotNull(sessionManager, "sessionManager must be non-null.");
         this.sessionOrchestrator = Preconditions.checkNotNull(sessionOrchestrator, "sessionOrchestrator must be non-null.");
     }
 
@@ -42,15 +32,8 @@ class IfPlayerSendLineListener {
     			return;
     		}
 
-        SessionKey sessionKey = new SessionKey(messageReceivedEvent.getChannel().getLongID());
-
-        Session session = sessionManager.getSession(sessionKey)
-                .orElse(null);
-
-        if (session != null) {
-            String input = messageReceivedEvent.getMessage().getContent();
-            sessionOrchestrator.advance(session, input, messageReceivedEvent.getChannel());
-        }
+        String input = messageReceivedEvent.getMessage().getContent();
+        sessionOrchestrator.advance(input, messageReceivedEvent.getChannel());
     }
     
     private boolean shouldMessageBeIgnored(IMessage message) {
@@ -62,7 +45,7 @@ class IfPlayerSendLineListener {
     	
 		MessageTokenizer tokenizer = new MessageTokenizer(message);
 		
-		// For some reason, @everyone is not a mention, so we need to check it explicitly.
+		// For reasons only known to Discord devs, @everyone is not a mention so we need to check it explicitly.
 		// hasNextEmoji doesn't return true for "standard" emojis, such as :D
 		return tokenizer.hasNextEmoji() 
 				|| tokenizer.hasNextMention() 

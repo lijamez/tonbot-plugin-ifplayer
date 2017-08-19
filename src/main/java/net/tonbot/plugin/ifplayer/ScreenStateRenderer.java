@@ -1,5 +1,6 @@
 package net.tonbot.plugin.ifplayer;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,10 +19,11 @@ class ScreenStateRenderer {
 	/**
 	 * Updates the channel with the new screen state.
 	 * 
-	 * @param sesison
+	 * @param session
 	 *            {@link Session}
 	 * @param screenState
-	 *            {@link ScreenState}
+	 *            {@link ScreenState} May only be null if the session's
+	 *            {@link GameMachine} is stopped.
 	 * @param channel
 	 *            {@link IChannel}
 	 */
@@ -31,14 +33,12 @@ class ScreenStateRenderer {
 
 		GameMachine gm = session.getGameMachine();
 
-		if (gm.isStopped()) {
+		if (!gm.isStopped()) {
 			Preconditions.checkNotNull(screenState, "screenState must be non-null when game machine isn't stopped.");
-		} else {
 			sendScreen(screenState, channel);
 		}
 
 		updateChannelTopic(session, screenState, channel);
-
 	}
 
 	private void sendScreen(ScreenState screenState, IChannel channel) {
@@ -57,8 +57,12 @@ class ScreenStateRenderer {
 		}
 
 		String output = discordMessageBuffer.toString();
-		
-		BotUtils.sendMessage(channel, output);
+
+		if (!StringUtils.isBlank(output)) {
+			BotUtils.sendMessage(channel, output);
+		} else {
+			LOG.warn("Screens are blank.");
+		}
 	}
 
 	private void updateChannelTopic(Session session, ScreenState screenState, IChannel channel) {

@@ -7,7 +7,6 @@ import com.google.inject.Inject;
 import net.tonbot.common.Activity;
 import net.tonbot.common.ActivityDescriptor;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
-import sx.blah.discord.handle.obj.IChannel;
 
 class IfPlayerPlayStoryActivity implements Activity {
 
@@ -17,14 +16,11 @@ class IfPlayerPlayStoryActivity implements Activity {
             .description("Plays a story in the current channel.")
             .build();
 
-    private final SessionManager sessionManager;
     private final SessionOrchestrator sessionOrchestrator;
 
     @Inject
     public IfPlayerPlayStoryActivity(
-    		SessionManager sessionManager,
     		SessionOrchestrator sessionOrchestrator) {
-        this.sessionManager = Preconditions.checkNotNull(sessionManager, "sessionManager must be non-null.");
         this.sessionOrchestrator = Preconditions.checkNotNull(sessionOrchestrator, "sessionOrchestrator must be non-null.");
     }
 
@@ -35,11 +31,6 @@ class IfPlayerPlayStoryActivity implements Activity {
 
     @Override
     public void enact(MessageReceivedEvent messageReceivedEvent, String args) {
-        IChannel channel = messageReceivedEvent.getChannel();
-        SessionKey sessionKey = new SessionKey(channel.getLongID());
-
-        Session session = sessionManager.createSession(sessionKey, channel, args);
-        
-        sessionOrchestrator.advance(session, null, messageReceivedEvent.getChannel());
+    		sessionOrchestrator.create(messageReceivedEvent.getChannel(), args);
     }
 }

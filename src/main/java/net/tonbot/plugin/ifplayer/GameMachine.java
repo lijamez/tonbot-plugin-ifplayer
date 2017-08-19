@@ -92,6 +92,7 @@ class GameMachine implements ScreenModel, OutputStream {
 	private boolean selected = true; // No idea wtf this does.
 	private boolean started = false;
 	private boolean statusLineIsReadable = false;
+	private boolean manuallyStopped = false;
 
 	public GameMachine(final Story story) {
 		this.story = Preconditions.checkNotNull(story, "story must be non-null.");
@@ -101,7 +102,7 @@ class GameMachine implements ScreenModel, OutputStream {
 		}
 
 		this.windows = new ArrayList<>(MAX_EXPECTED_WINDOWS);
-		
+
 		// The lower window should be unconstrained.
 		this.windows.add(LOWER_WINDOW_INDEX, new DiscordAwareCharacterMatrix());
 
@@ -138,13 +139,22 @@ class GameMachine implements ScreenModel, OutputStream {
 	 * Gets the next screen state after providing the given input.
 	 * 
 	 * @param input
-	 *            The input. Only nullable on the first call. Non-null on subsequent calls.
+	 *            The input. Only nullable on the first call. Non-null on subsequent
+	 *            calls.
 	 * @return An optional {@link ScreenState}. Empty if the game not running or is
 	 *         no longer running.
 	 * @throws GameMachineException
-	 *             If the game is not in the correct state.
+	 *             If an error occurred with the turn. These exceptions do not
+	 *             necessarily mean that the game machine has been stopped. This
+	 *             exception can be thrown if the GameMachine is actually stopped,
+	 *             though.
+	 * 
 	 */
 	public Optional<ScreenState> takeTurn(String input) {
+		if (this.manuallyStopped || vm.state().runState() == ZMachineRunStates.Halted()) {
+			throw new GameMachineException("This GameMachine has been stopped.");
+		}
+
 		if (this.started) {
 			Preconditions.checkNotNull(!StringUtils.isEmpty(input), "input must be non-null and non-empty.");
 
@@ -205,7 +215,14 @@ class GameMachine implements ScreenModel, OutputStream {
 	 * @return True iff the machine is stopped.
 	 */
 	public boolean isStopped() {
-		return vm.state().runState() == ZMachineRunStates.Halted();
+		return vm.state().runState() == ZMachineRunStates.Halted() || manuallyStopped;
+	}
+
+	/**
+	 * Marks the GameMachine as stopped.
+	 */
+	public void stop() {
+		this.manuallyStopped = true;
 	}
 
 	@Override

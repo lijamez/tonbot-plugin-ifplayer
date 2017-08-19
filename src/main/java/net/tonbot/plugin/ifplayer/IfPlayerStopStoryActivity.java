@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 
 import net.tonbot.common.Activity;
 import net.tonbot.common.ActivityDescriptor;
+import net.tonbot.common.BotUtils;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
 
@@ -15,11 +16,12 @@ class IfPlayerStopStoryActivity implements Activity {
             .route(ImmutableList.of("if", "stop"))
             .description("Stops playing the current story.")
             .build();
-    private final SessionManager sessionManager;
+    private final SessionOrchestrator sessionOrchestrator;
 
     @Inject
-    public IfPlayerStopStoryActivity(SessionManager sessionManager) {
-        this.sessionManager = Preconditions.checkNotNull(sessionManager, "sessionManager must be non-null.");
+    public IfPlayerStopStoryActivity(
+    		SessionOrchestrator sessionOrchestrator) {
+        this.sessionOrchestrator = Preconditions.checkNotNull(sessionOrchestrator, "sessionOrchestrator must be non-null.");
     }
 
     @Override
@@ -30,8 +32,10 @@ class IfPlayerStopStoryActivity implements Activity {
     @Override
     public void enact(MessageReceivedEvent messageReceivedEvent, String args) {
         IChannel channel = messageReceivedEvent.getChannel();
-        SessionKey sessionKey = new SessionKey(channel.getLongID());
 
-        sessionManager.endSession(sessionKey);
+        boolean sessionExisted = sessionOrchestrator.end(channel);
+        if (!sessionExisted) {
+        		BotUtils.sendMessage(channel, "You're not playing anything!");
+        }
     }
 }
