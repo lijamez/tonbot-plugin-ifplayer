@@ -95,7 +95,8 @@ class SessionOrchestratorImpl implements SessionOrchestrator {
 		} catch (Exception e) {
 			LOG.error("GameMachine has thrown an unexpected exception.", e);
 			BotUtils.sendMessage(channel, "The player has crashed! :(");
-			this.end(channel);
+			this.endInternal(channel);
+			screenStateRenderer.render(session, null, channel);
 			return;
 		}
 
@@ -113,10 +114,13 @@ class SessionOrchestratorImpl implements SessionOrchestrator {
 			BotUtils.sendMessage(channel, "Invalid slot number. Must be from 0-" + (saveManager.getMaxSlots() - 1));
 			return;
 		}
-		
+
 		Session session = getSession(channel);
-		SaveFile saveFile = saveManager.getSaveFile(channel.getLongID(), session.getGameMachine().getStory(), slotNumber);
+		SaveFile saveFile = saveManager.getSaveFile(channel.getLongID(), session.getGameMachine().getStory(),
+				slotNumber);
 		session.getGameMachine().setSaveFile(saveFile);
+		
+		screenStateRenderer.render(session, null, channel);
 		BotUtils.sendMessage(channel, "Switched to save slot " + slotNumber);
 	}
 
@@ -125,6 +129,23 @@ class SessionOrchestratorImpl implements SessionOrchestrator {
 		Preconditions.checkNotNull(channel, "channel must be non-null.");
 
 		Session session = getSession(channel);
+		
+		if (!this.endInternal(channel)) {
+			return false;
+		}
+		
+		screenStateRenderer.render(session, null, channel);
+		BotUtils.sendMessage(channel, "Story '" + session.getGameMachine().getStory().getName() + "' has stopped.");
+		return true;
+	}
+	
+	/**
+	 * Ends a session by channel.
+	 * @param channel {@link IChannel}. Non-null.
+	 * @return True if a session was ended. False otherwise.
+	 */
+	private boolean endInternal(IChannel channel) {
+		Session session = getSession(channel);
 
 		if (session == null) {
 			return false;
@@ -132,9 +153,6 @@ class SessionOrchestratorImpl implements SessionOrchestrator {
 
 		session.getGameMachine().stop();
 		sessionManager.removeSession(session.getSessionKey());
-
-		screenStateRenderer.render(session, null, channel);
-		BotUtils.sendMessage(channel, "Story '" + session.getGameMachine().getStory().getName() + "' has stopped.");
 		return true;
 	}
 
@@ -159,27 +177,39 @@ class SessionOrchestratorImpl implements SessionOrchestrator {
 		Map<Integer, SaveFile> saveMap = saveFiles.stream()
 				.collect(Collectors.toMap(sf -> sf.getSlot(), sf -> sf));
 
+		SaveFile currentSaveFile = session.getGameMachine().getSaveFile().orElse(null);
+		
 		EmbedBuilder embedBuilder = new EmbedBuilder();
-		embedBuilder.appendDescription("Save slots for " + story.getName() + " in channel " + channel.getName() + ":");
+		embedBuilder.appendDescription("Save slots for **" + story.getName() + "** in channel **" + channel.getName() + "**:");
 
 		for (int i = 0; i < saveManager.getMaxSlots(); i++) {
 			StringBuilder contentsBuilder = new StringBuilder();
 			SaveFile saveFileInSlot = saveMap.get(i);
-
+			
 			if (saveFileInSlot == null) {
 				contentsBuilder.append("Free");
 			} else if (saveFileInSlot.getMetadata().isPresent()) {
 				SaveFileMetadata metadata = saveFileInSlot.getMetadata().get();
-				contentsBuilder.append("Saved by: ");
-				contentsBuilder.append(metadata.getCreatedBy());
-				contentsBuilder.append("\n");
-				contentsBuilder.append("Saved on: ");
-				contentsBuilder.append(metadata.getCreationDate().toString());
+				contentsBuilder
+						.append("Saved by: ")
+						.append(metadata.getCreatedBy())
+						.append("\n")
+						.append("Saved on: ")
+						.append(metadata.getCreationDate().toString());
 			} else {
 				contentsBuilder.append("Occupied");
 			}
 
-			embedBuilder.appendField("Slot " + i, contentsBuilder.toString(), false);
+			StringBuilder topicBuilder = new StringBuilder();
+			topicBuilder
+					.append("Slot ")
+					.append(i);
+			
+			if (currentSaveFile != null && currentSaveFile.getSlot() == i) {
+				topicBuilder.append(" :point_left:");
+			}
+
+			embedBuilder.appendField(topicBuilder.toString(), contentsBuilder.toString(), false);
 		}
 
 		BotUtils.sendEmbeddedContent(channel, embedBuilder.build());
@@ -191,7 +221,7 @@ class SessionOrchestratorImpl implements SessionOrchestrator {
 			BotUtils.sendMessage(channel, "Invalid slot number. Must be from 0-" + (saveManager.getMaxSlots() - 1));
 			return;
 		}
-		
+
 		Session session = getSession(channel);
 
 		if (session == null) {

@@ -134,6 +134,14 @@ class GameMachine implements ScreenModel, OutputStream {
 
 		this.saveFile = saveFile;
 	}
+	
+	/**
+	 * Gets the save file.
+	 * @return {@link SaveFile}
+	 */
+	public Optional<SaveFile> getSaveFile() {
+		return Optional.ofNullable(this.saveFile);
+	}
 
 	/**
 	 * Gets the next screen state after providing the given input.
