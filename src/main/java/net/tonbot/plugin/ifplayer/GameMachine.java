@@ -271,6 +271,25 @@ class GameMachine implements ScreenModel, OutputStream {
 	@Override
 	public void eraseWindow(int windowId) {
 		LOG.debug("eraseWindow called with windowId {}", windowId);
+		
+		if (windowId == -1) {
+			CharacterMatrix topWindow = this.windows.get(UPPER_WINDOW_INDEX);
+			topWindow.setMaxHeight(0);
+			topWindow.reset();
+			
+			CharacterMatrix bottomWindow = this.windows.get(LOWER_WINDOW_INDEX);
+			bottomWindow.reset();
+		} else if (windowId == -2) {
+			CharacterMatrix topWindow = this.windows.get(UPPER_WINDOW_INDEX);
+			topWindow.reset();
+			
+			CharacterMatrix bottomWindow = this.windows.get(LOWER_WINDOW_INDEX);
+			bottomWindow.reset();
+		} else if ((windowId == UPPER_WINDOW_INDEX || windowId == 3) && activeWindow == UPPER_WINDOW_INDEX) {
+			this.windows.get(UPPER_WINDOW_INDEX).reset();
+		} else if ((windowId == LOWER_WINDOW_INDEX || windowId == 3) && activeWindow == LOWER_WINDOW_INDEX) {
+			this.windows.get(LOWER_WINDOW_INDEX).reset();
+		}
 	}
 
 	@Override
@@ -448,6 +467,7 @@ class GameMachine implements ScreenModel, OutputStream {
 
 	@Override
 	public void select(boolean flag) {
+		LOG.debug("select called with flag {}", flag);
 		this.selected = flag;
 	}
 

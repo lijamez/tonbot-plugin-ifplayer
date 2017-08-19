@@ -13,7 +13,7 @@ import lombok.Getter;
 
 /**
  * Invariant:
- * cursorY must always point to an existent index.
+ * cursorY must always point to an existing index.
  * cursorX doesn't have to point to an existing index. (But if cursorX is > 0, then cursorX-1 must be pointing to an existing index.)
  */
 class CharacterMatrix {
@@ -54,7 +54,7 @@ class CharacterMatrix {
 	}
 	
 	/**
-	 * Sets the maximum height. If the height has been shortened, then all lines beyond the new maxHeight will be cleared. 
+	 * Sets the maximum height. No lines will be cleared.
 	 * The cursor will not move. Hence, the cursor may be out of bounds after this operation.
 	 * @param maxHeight The new max height. Must be greater than or equal to 0.
 	 */
@@ -62,16 +62,11 @@ class CharacterMatrix {
 		Preconditions.checkArgument(maxHeight >= 0, "maxHeight must be non-negative.");
 		this.maxHeight = maxHeight;
 		
-		// Removes all lines beyond maxHeight.
-		while (matrix.size() > maxHeight) {
-			matrix.remove(maxHeight-1);
-		}
-		
 		// What should happen to the cursor? hmm...
 	}
 	
 	/**
-	 * Resets the position of the cursor and clears out all data. 
+	 * Sets the position of the cursor to 0,0 and clears out all data. 
 	 * Max height and width are preserved.
 	 */
 	public void reset() {
