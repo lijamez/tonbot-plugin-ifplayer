@@ -1,9 +1,7 @@
 package net.tonbot.plugin.ifplayer;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -85,7 +83,11 @@ class GameMachine implements ScreenModel, OutputStream {
 
 	@Getter
 	private final Story story;
-	private File saveFile = null;
+	private final long channelId;
+
+	private SaveFile saveFile = null;
+	private OnSavedCallback fileSavedCallback;
+	private boolean isSavingToFile = false;
 
 	private List<CharacterMatrix> windows;
 	private int activeWindow;
@@ -94,8 +96,10 @@ class GameMachine implements ScreenModel, OutputStream {
 	private boolean statusLineIsReadable = false;
 	private boolean manuallyStopped = false;
 
-	public GameMachine(final Story story) {
+	public GameMachine(final Story story, final long channelId, final OnSavedCallback fileSavedCallback) {
 		this.story = Preconditions.checkNotNull(story, "story must be non-null.");
+		this.channelId = channelId;
+		this.fileSavedCallback = Preconditions.checkNotNull(fileSavedCallback, "fileSavedCallback must be non-null.");
 
 		if (story.getVersion() == 6) {
 			throw new IllegalArgumentException("Z-Machine V6 files are not supported.");
@@ -123,14 +127,10 @@ class GameMachine implements ScreenModel, OutputStream {
 	 * Sets the save file.
 	 * 
 	 * @param saveFile
-	 *            The save file. Must be a file. If it doesn't exist, it will be
-	 *            created.
+	 *            The save file.
 	 */
-	public void setSaveFile(File saveFile) {
+	public void setSaveFile(SaveFile saveFile) {
 		Preconditions.checkNotNull(saveFile, "saveFile must be non-null.");
-		if (saveFile.exists()) {
-			Preconditions.checkArgument(saveFile.isFile(), "saveFile must be a file.");
-		}
 
 		this.saveFile = saveFile;
 	}
@@ -141,6 +141,8 @@ class GameMachine implements ScreenModel, OutputStream {
 	 * @param input
 	 *            The input. Only nullable on the first call. Non-null on subsequent
 	 *            calls.
+	 * @param username
+	 *            The user who sent the input.
 	 * @return An optional {@link ScreenState}. Empty if the game not running or is
 	 *         no longer running.
 	 * @throws GameMachineException
@@ -150,7 +152,9 @@ class GameMachine implements ScreenModel, OutputStream {
 	 *             though.
 	 * 
 	 */
-	public Optional<ScreenState> takeTurn(String input) {
+	public Optional<ScreenState> takeTurn(String input, String username) {
+		Preconditions.checkNotNull(username, "username must be non-null.");
+		
 		if (this.manuallyStopped || vm.state().runState() == ZMachineRunStates.Halted()) {
 			throw new GameMachineException("This GameMachine has been stopped.");
 		}
@@ -172,6 +176,16 @@ class GameMachine implements ScreenModel, OutputStream {
 		while (true) {
 			while (vm.state().runState() == ZMachineRunStates.Running()) {
 				vm.doInstruction(false);
+			}
+
+			if (isSavingToFile) {
+				// Saving finished
+				SaveFileMetadata md = SaveFileMetadata.builder()
+						.createdBy(username)
+						.creationDate(ZonedDateTime.now())
+						.build();
+				this.saveFile = fileSavedCallback.getOnSavedCallback(channelId, saveFile, md);
+				isSavingToFile = false;
 			}
 
 			if (vm.state().runState() == ZMachineRunStates.ReadLine()
@@ -271,18 +285,18 @@ class GameMachine implements ScreenModel, OutputStream {
 	@Override
 	public void eraseWindow(int windowId) {
 		LOG.debug("eraseWindow called with windowId {}", windowId);
-		
+
 		if (windowId == -1) {
 			CharacterMatrix topWindow = this.windows.get(UPPER_WINDOW_INDEX);
 			topWindow.setMaxHeight(0);
 			topWindow.reset();
-			
+
 			CharacterMatrix bottomWindow = this.windows.get(LOWER_WINDOW_INDEX);
 			bottomWindow.reset();
 		} else if (windowId == -2) {
 			CharacterMatrix topWindow = this.windows.get(UPPER_WINDOW_INDEX);
 			topWindow.reset();
-			
+
 			CharacterMatrix bottomWindow = this.windows.get(LOWER_WINDOW_INDEX);
 			bottomWindow.reset();
 		} else if ((windowId == UPPER_WINDOW_INDEX || windowId == 3) && activeWindow == UPPER_WINDOW_INDEX) {
@@ -420,15 +434,15 @@ class GameMachine implements ScreenModel, OutputStream {
 		java.io.InputStream saveFileInputStream;
 
 		try {
-			if (saveFile != null && saveFile.exists()) {
-				saveFileInputStream = new FileInputStream(saveFile);
-				LOG.debug("Attempting to load file at {}", saveFile.getAbsolutePath());
+			if (saveFile != null) {
+				saveFileInputStream = saveFile.getInputStream();
+				LOG.debug("Attempting to load file at {}", saveFile.getURI());
 			} else {
 				saveFileInputStream = null;
 			}
-		} catch (IOException e) {
+		} catch (UncheckedIOException e) {
 			saveFileInputStream = null;
-			LOG.error("Save file at {} could not be read.", saveFile.getAbsolutePath(), e);
+			LOG.error("Save file at {} could not be read.", saveFile.getURI(), e);
 			throw new GameMachineException("Failed to load the game.", e);
 		}
 
@@ -440,18 +454,15 @@ class GameMachine implements ScreenModel, OutputStream {
 			throw new GameMachineException("Cannot save the game because there is no save file selected.");
 		}
 
-		java.io.OutputStream saveFileOutputStream;
 		try {
-			saveFile.createNewFile();
-			saveFileOutputStream = new FileOutputStream(saveFile);
-			LOG.debug("Attempting to save file at {}", saveFile.getAbsolutePath());
-		} catch (IOException e) {
-			saveFileOutputStream = null;
-			LOG.error("Save file at {} could not be accessed.", saveFile.getAbsolutePath(), e);
+			java.io.OutputStream saveFileOutputStream = saveFile.getOutputStream();
+			LOG.debug("Attempting to save file at {}", saveFile.getURI());
+			vm.resumeWithSaveStream(saveFileOutputStream);
+			this.isSavingToFile = true;
+		} catch (UncheckedIOException e) {
+			LOG.error("Save file at {} could not be accessed.", saveFile.getURI(), e);
 			throw new GameMachineException("Failed to save the game.", e);
 		}
-
-		vm.resumeWithSaveStream(saveFileOutputStream);
 	}
 
 	@Override

@@ -31,6 +31,6 @@ class IfPlayerPlayStoryActivity implements Activity {
 
     @Override
     public void enact(MessageReceivedEvent messageReceivedEvent, String args) {
-    		sessionOrchestrator.create(messageReceivedEvent.getChannel(), args);
+    		sessionOrchestrator.create(messageReceivedEvent.getChannel(), args, messageReceivedEvent.getAuthor().getName());
     }
 }

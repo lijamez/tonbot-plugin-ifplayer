@@ -15,6 +15,8 @@ import net.tonbot.common.Prefix;
 
 class IfPlayerModule extends AbstractModule {
 
+	private static final int MAX_SAVE_SLOTS = 5;
+	
     private final String prefix;
     private final File storyDir;
     private final File saveDir;
@@ -36,9 +38,11 @@ class IfPlayerModule extends AbstractModule {
         bind(String.class).annotatedWith(Prefix.class).toInstance(prefix);
         bind(File.class).annotatedWith(StoryDir.class).toInstance(storyDir);
         bind(File.class).annotatedWith(SaveDir.class).toInstance(saveDir);
-
+        bind(Integer.class).annotatedWith(MaxSaveSlots.class).toInstance(MAX_SAVE_SLOTS);
+        
         bind(SessionManager.class).to(SessionManagerImpl.class).in(Scopes.SINGLETON);
         bind(SessionOrchestrator.class).to(SessionOrchestratorImpl.class).in(Scopes.SINGLETON);
+        bind(SaveManager.class).to(SaveManagerImpl.class).in(Scopes.SINGLETON);
     }
 
     @Provides
@@ -47,7 +51,10 @@ class IfPlayerModule extends AbstractModule {
             IfPlayerListStoriesActivity listStoriesActivity,
             IfPlayerPlayStoryActivity playStoryActivity,
             IfPlayerStopStoryActivity stopStoryActivity,
-            IfPlayerControlsActivity controlsActivity) {
-        return ImmutableSet.of(listStoriesActivity, playStoryActivity, stopStoryActivity, controlsActivity);
+            IfPlayerControlsActivity controlsActivity,
+            IfPlayerListSaveSlotsActivity listSaveSlotsActivity,
+            IfPlayerSetSaveSlotActivity setSaveSlotActivity,
+            IfPlayerDeleteSaveSlotActivity deleteSaveSlotActivity) {
+        return ImmutableSet.of(listStoriesActivity, playStoryActivity, stopStoryActivity, controlsActivity, listSaveSlotsActivity, setSaveSlotActivity, deleteSaveSlotActivity);
     }
 }

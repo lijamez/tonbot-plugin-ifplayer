@@ -1,6 +1,5 @@
 package net.tonbot.plugin.ifplayer;
 
-import java.io.File;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -13,22 +12,27 @@ class SessionManagerImpl implements SessionManager {
 
 	private final ConcurrentHashMap<SessionKey, Session> sessions;
 
-	private final File saveDirectory;
+	private final SaveManager saveManager;
+	private final OnSavedCallback onSavedCallback;
 
 	/**
 	 * Constructor.
 	 * 
-	 * @param saveDirectory
-	 *            The directory for save files. Non-null.
+	 * @param saveManager
+	 *            {@link SaveManager}. Non-null.
 	 */
 	@Inject
-	public SessionManagerImpl(
-			@SaveDir File saveDirectory) {
+	public SessionManagerImpl(SaveManager saveManager) {
+		this.saveManager = Preconditions.checkNotNull(saveManager, "saveManager must be non-null.");
+		this.onSavedCallback = new OnSavedCallback() {
 
-		Preconditions.checkNotNull(saveDirectory, "saveDirectory must be non-null.");
-		Preconditions.checkArgument(saveDirectory.exists(), "saveDirectory must exist.");
-		Preconditions.checkArgument(saveDirectory.isDirectory(), "saveDirectory must be a directory.");
-		this.saveDirectory = saveDirectory;
+			@Override
+			public SaveFile getOnSavedCallback(long channelId, SaveFile saveFile,
+					SaveFileMetadata newSaveFileMetadata) {
+				return saveManager.saveNewMetadata(channelId, saveFile, newSaveFileMetadata);
+			}
+
+		};
 
 		this.sessions = new ConcurrentHashMap<>();
 	}
@@ -42,18 +46,16 @@ class SessionManagerImpl implements SessionManager {
 	}
 
 	@Override
-	public Session createSession(SessionKey sessionKey, IChannel channel, File storyFile) {
+	public Session createSession(SessionKey sessionKey, IChannel channel, Story story) {
 		Preconditions.checkNotNull(sessionKey, "sessionKey must be non-null.");
 		Preconditions.checkNotNull(channel, "channel must be non-null.");
-		Preconditions.checkNotNull(storyFile, "storyFile must be non-null.");
+		Preconditions.checkNotNull(story, "story must be non-null.");
 
-		String channelId = channel.getStringID();
-		String saveFileName = channelId + "-" + storyFile.getName() + ".save";
-		File saveFile = new File(saveDirectory.getAbsolutePath() + "/" + saveFileName);
+		SaveFile saveFile = saveManager.getSaveFile(channel.getLongID(), story, 0);
 
-		String sessionName = storyFile.getName();
+		String sessionName = story.getName();
 
-		Session session = new Session(sessionKey, sessionName, storyFile, saveFile, channel);
+		Session session = new Session(sessionKey, sessionName, story, saveFile, channel, onSavedCallback);
 
 		sessions.put(sessionKey, session);
 

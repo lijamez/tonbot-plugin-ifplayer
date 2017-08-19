@@ -1,6 +1,5 @@
 package net.tonbot.plugin.ifplayer;
 
-import java.io.File;
 import java.util.Optional;
 
 import net.tonbot.common.TonbotBusinessException;
@@ -12,11 +11,11 @@ interface SessionManager {
      * Creates a {@link Session} with the name of a story. Overwrites any existing session.
      * @param sessionKey {@link SessionKey}. Non-null.
      * @param channel {@link IChannel}. Non-null.
-     * @param storyFile The file of the story. Non-null.
+     * @param story The story. Non-null.
      * @return {@link Session}. Non-null.
      * @throws TonbotBusinessException if this method couldn't pick a story from the name.
      */
-    Session createSession(SessionKey sessionKey, IChannel channel, File storyFile);
+    Session createSession(SessionKey sessionKey, IChannel channel, Story story);
 
     /**
      * Gets a {@link Session} by its {@link SessionKey}.

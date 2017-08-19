@@ -33,7 +33,7 @@ class IfPlayerSendLineListener {
     		}
 
         String input = messageReceivedEvent.getMessage().getContent();
-        sessionOrchestrator.advance(input, messageReceivedEvent.getChannel());
+        sessionOrchestrator.advance(input, messageReceivedEvent.getChannel(), messageReceivedEvent.getAuthor().getName());
     }
     
     private boolean shouldMessageBeIgnored(IMessage message) {
