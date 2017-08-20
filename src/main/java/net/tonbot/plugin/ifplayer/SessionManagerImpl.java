@@ -6,12 +6,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 
+import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
 
 class SessionManagerImpl implements SessionManager {
 
 	private final ConcurrentHashMap<SessionKey, Session> sessions;
 
+	private final IDiscordClient discordClient;
 	private final SaveManager saveManager;
 	private final OnSavedCallback onSavedCallback;
 
@@ -22,7 +24,10 @@ class SessionManagerImpl implements SessionManager {
 	 *            {@link SaveManager}. Non-null.
 	 */
 	@Inject
-	public SessionManagerImpl(SaveManager saveManager) {
+	public SessionManagerImpl(
+			IDiscordClient discordClient,
+			SaveManager saveManager) {
+		this.discordClient = Preconditions.checkNotNull(discordClient, "discordClient must be non-null.");
 		this.saveManager = Preconditions.checkNotNull(saveManager, "saveManager must be non-null.");
 		this.onSavedCallback = new OnSavedCallback() {
 
@@ -62,7 +67,7 @@ class SessionManagerImpl implements SessionManager {
 				saveFile, 
 				channel, 
 				onSavedCallback,
-				new ScreenStateRenderer());
+				new ScreenStateRenderer(discordClient));
 
 		sessions.put(sessionKey, session);
 

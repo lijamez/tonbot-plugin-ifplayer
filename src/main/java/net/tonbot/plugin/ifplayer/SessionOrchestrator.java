@@ -1,5 +1,6 @@
 package net.tonbot.plugin.ifplayer;
 
+import net.tonbot.common.TonbotBusinessException;
 import sx.blah.discord.handle.obj.IChannel;
 
 /**
@@ -12,6 +13,7 @@ interface SessionOrchestrator {
 	 * @param channel {@link IChannel}.
 	 * @param storyName The name of the story to start. Non-null.
 	 * @param username The name of the user who tried to create a session.
+	 * @throws TonbotBusinessException if there is no story with the provided name, or if there are multiple matches.
 	 */
 	void create(IChannel channel, String storyName, String username);
 	

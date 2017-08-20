@@ -7,14 +7,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import com.google.inject.Inject;
 
 import lombok.Builder;
 import lombok.Data;
-import net.tonbot.common.BotUtils;
+import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RequestBuffer;
+import sx.blah.discord.util.RequestBuilder;
 
 /**
  * This class will:
@@ -33,9 +35,13 @@ class ScreenStateRenderer {
 	private static final Logger LOG = LoggerFactory.getLogger(ScreenStateRenderer.class);
 	private static final int SEPARATION = 15;
 
+	private final IDiscordClient discordClient;
+
 	private Topic lastTopic;
 
-	public ScreenStateRenderer() {
+	@Inject
+	public ScreenStateRenderer(IDiscordClient discordClient) {
+		this.discordClient = Preconditions.checkNotNull(discordClient, "discordClient must be non-null.");
 		this.lastTopic = Topic.builder()
 				.build();
 	}
@@ -106,7 +112,14 @@ class ScreenStateRenderer {
 		String output = discordMessageBuffer.toString();
 
 		if (!StringUtils.isBlank(output)) {
-			BotUtils.sendMessage(channel, output);
+			new RequestBuilder(discordClient)
+					.shouldBufferRequests(true)
+					.setAsync(true)
+					.doAction(() -> {
+						channel.sendMessage(output);
+						return true;
+					})
+					.execute();
 		} else {
 			LOG.warn("Screens are blank.");
 		}

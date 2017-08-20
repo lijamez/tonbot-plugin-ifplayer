@@ -6,7 +6,7 @@ import com.google.inject.Inject;
 
 import net.tonbot.common.Activity;
 import net.tonbot.common.ActivityDescriptor;
-import net.tonbot.common.BotUtils;
+import net.tonbot.common.TonbotBusinessException;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
 
@@ -44,8 +44,7 @@ class IfPlayerSetSaveSlotActivity implements Activity {
 
 			sessionOrchestrator.switchSave(channel, slotNumber);
 		} catch (NumberFormatException e) {
-			BotUtils.sendMessage(channel, "You need to enter a number from 0 to " + (saveManager.getMaxSlots() - 1));
-			return;
+			throw new TonbotBusinessException("You need to enter a number from 0 to " + (saveManager.getMaxSlots() - 1), e);
 		}
 	}
 }

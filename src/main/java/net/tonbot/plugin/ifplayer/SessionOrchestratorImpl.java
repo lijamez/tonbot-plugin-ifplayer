@@ -12,23 +12,29 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 
-import net.tonbot.common.BotUtils;
+import net.tonbot.common.TonbotBusinessException;
+import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.util.EmbedBuilder;
+import sx.blah.discord.util.RequestBuilder;
 
 class SessionOrchestratorImpl implements SessionOrchestrator {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SessionOrchestratorImpl.class);
 
+	private final IDiscordClient discordClient;
 	private final SessionManager sessionManager;
 	private final StoryLibrary storyLibrary;
 	private final SaveManager saveManager;
 
 	@Inject
 	public SessionOrchestratorImpl(
+			IDiscordClient discordClient,
 			SessionManager sessionManager,
 			StoryLibrary storyLibrary,
 			SaveManager saveManager) {
+		this.discordClient = Preconditions.checkNotNull(discordClient, "discordClient must be non-null.");
 		this.sessionManager = Preconditions.checkNotNull(sessionManager, "sessionManager must be non-null.");
 		this.storyLibrary = Preconditions.checkNotNull(storyLibrary, "storyLibrary must be non-null.");
 		this.saveManager = Preconditions.checkNotNull(saveManager, "saveManager must be non-null.");
@@ -42,11 +48,9 @@ class SessionOrchestratorImpl implements SessionOrchestrator {
 
 		List<File> foundFiles = storyLibrary.findStories(storyName);
 		if (foundFiles.isEmpty()) {
-			BotUtils.sendMessage(channel, "There is no story with that name.");
-			return;
+			throw new TonbotBusinessException("There is no story with that name.");
 		} else if (foundFiles.size() > 1) {
-			BotUtils.sendMessage(channel, "You're going to have to be more specific than that.");
-			return;
+			throw new TonbotBusinessException("You're going to have to be more specific than that.");
 		}
 
 		File storyFile = foundFiles.get(0);
@@ -74,7 +78,7 @@ class SessionOrchestratorImpl implements SessionOrchestrator {
 		Preconditions.checkNotNull(username, "username must be non-null.");
 
 		Session session = getSession(channel);
-		
+
 		if (session == null) {
 			return;
 		}
@@ -87,65 +91,64 @@ class SessionOrchestratorImpl implements SessionOrchestrator {
 			screenState = gameMachine.takeTurn(input, username);
 		} catch (GameMachineException e) {
 			// Handle a non-fatal exception.
-			BotUtils.sendMessage(channel, "Error: " + e.getMessage());
-			return;
+			throw new TonbotBusinessException("Error: " + e.getMessage());
 		} catch (Exception e) {
 			LOG.error("GameMachine has thrown an unexpected exception.", e);
-			BotUtils.sendMessage(channel, "The player has crashed! :(");
+			this.sendMessage(channel, "The player has crashed! :(");
 			this.endInternal(channel);
 			screenStateRenderer.render(session, null, channel);
-			return;
+			throw e;
 		}
 
 		screenStateRenderer.render(session, screenState.orElse(null), channel);
 
 		if (!screenState.isPresent()) {
 			sessionManager.removeSession(session.getSessionKey());
-			BotUtils.sendMessage(channel, "Story '" + gameMachine.getStory().getName() + "' has stopped.");
+			this.sendMessage(channel, "Story '" + gameMachine.getStory().getName() + "' has stopped.");
 		}
 	}
 
 	@Override
 	public void switchSave(IChannel channel, int slotNumber) {
 		if (slotNumber < 0 || slotNumber >= saveManager.getMaxSlots()) {
-			BotUtils.sendMessage(channel, "Invalid slot number. Must be from 0-" + (saveManager.getMaxSlots() - 1));
-			return;
+			throw new TonbotBusinessException("Invalid slot number. Must be from 0-" + (saveManager.getMaxSlots() - 1));
 		}
 
 		Session session = getSession(channel);
 		if (session == null) {
-			BotUtils.sendMessage(channel, "You need to be playing a story first.");
-			return;
+			throw new TonbotBusinessException("You need to be playing a story first.");
 		}
-		
+
 		ScreenStateRenderer screenStateRenderer = session.getScreenStateRenderer();
-		
+
 		SaveFile saveFile = saveManager.getSaveFile(channel.getLongID(), session.getGameMachine().getStory(),
 				slotNumber);
 		session.getGameMachine().setSaveFile(saveFile);
-		
+
 		screenStateRenderer.render(session, null, channel);
-		BotUtils.sendMessage(channel, "Switched to save slot " + slotNumber);
+		this.sendMessage(channel, "Switched to save slot " + slotNumber);
 	}
 
 	@Override
 	public boolean end(IChannel channel) {
 		Preconditions.checkNotNull(channel, "channel must be non-null.");
-		
+
 		Session session = getSession(channel);
-		
+
 		if (session != null) {
 			this.endInternal(channel);
-			BotUtils.sendMessage(channel, "Story '" + session.getGameMachine().getStory().getName() + "' has stopped.");
+			this.sendMessage(channel, "Story '" + session.getGameMachine().getStory().getName() + "' has stopped.");
 			return true;
 		}
-		
+
 		return false;
 	}
-	
+
 	/**
 	 * Ends a session by channel.
-	 * @param channel {@link IChannel}. Non-null.
+	 * 
+	 * @param channel
+	 *            {@link IChannel}. Non-null.
 	 * @return True if a session was ended. False otherwise.
 	 */
 	private boolean endInternal(IChannel channel) {
@@ -153,9 +156,9 @@ class SessionOrchestratorImpl implements SessionOrchestrator {
 		if (session == null) {
 			return false;
 		}
-		
+
 		session.getGameMachine().stop();
-		
+
 		ScreenStateRenderer screenStateRenderer = session.getScreenStateRenderer();
 		screenStateRenderer.render(session, null, channel);
 		sessionManager.removeSession(session.getSessionKey());
@@ -174,8 +177,7 @@ class SessionOrchestratorImpl implements SessionOrchestrator {
 		Session session = getSession(channel);
 
 		if (session == null) {
-			BotUtils.sendMessage(channel, "You need to play a story first.");
-			return;
+			throw new TonbotBusinessException("You need to play a story first.");
 		}
 
 		Story story = session.getGameMachine().getStory();
@@ -185,14 +187,15 @@ class SessionOrchestratorImpl implements SessionOrchestrator {
 				.collect(Collectors.toMap(sf -> sf.getSlot(), sf -> sf));
 
 		SaveFile currentSaveFile = session.getGameMachine().getSaveFile().orElse(null);
-		
+
 		EmbedBuilder embedBuilder = new EmbedBuilder();
-		embedBuilder.appendDescription("Save slots for **" + story.getName() + "** in channel **" + channel.getName() + "**:");
+		embedBuilder.appendDescription(
+				"Save slots for **" + story.getName() + "** in channel **" + channel.getName() + "**:");
 
 		for (int i = 0; i < saveManager.getMaxSlots(); i++) {
 			StringBuilder contentsBuilder = new StringBuilder();
 			SaveFile saveFileInSlot = saveMap.get(i);
-			
+
 			if (saveFileInSlot == null) {
 				contentsBuilder.append("Free");
 			} else if (saveFileInSlot.getMetadata().isPresent()) {
@@ -211,7 +214,7 @@ class SessionOrchestratorImpl implements SessionOrchestrator {
 			topicBuilder
 					.append("Slot ")
 					.append(i);
-			
+
 			if (currentSaveFile != null && currentSaveFile.getSlot() == i) {
 				topicBuilder.append(" :point_left:");
 			}
@@ -219,25 +222,45 @@ class SessionOrchestratorImpl implements SessionOrchestrator {
 			embedBuilder.appendField(topicBuilder.toString(), contentsBuilder.toString(), false);
 		}
 
-		BotUtils.sendEmbeddedContent(channel, embedBuilder.build());
+		this.sendEmbed(channel, embedBuilder.build());
 	}
 
 	@Override
 	public void deleteSaveSlot(IChannel channel, int slotNumber) {
 		if (slotNumber < 0 || slotNumber >= saveManager.getMaxSlots()) {
-			BotUtils.sendMessage(channel, "Invalid slot number. Must be from 0-" + (saveManager.getMaxSlots() - 1));
-			return;
+			throw new TonbotBusinessException("Invalid slot number. Must be from 0-" + (saveManager.getMaxSlots() - 1));
 		}
 
 		Session session = getSession(channel);
 
 		if (session == null) {
-			BotUtils.sendMessage(channel, "You need to play a story first.");
-			return;
+			throw new TonbotBusinessException("You need to play a story first.");
 		}
 
 		saveManager.deleteSaveFile(channel.getLongID(), session.getGameMachine().getStory(), slotNumber);
 
-		BotUtils.sendMessage(channel, "Successfully deleted slot " + slotNumber);
+		this.sendMessage(channel, "Successfully deleted slot " + slotNumber);
+	}
+
+	private void sendMessage(IChannel channel, String message) {
+		new RequestBuilder(discordClient)
+				.shouldBufferRequests(true)
+				.setAsync(true)
+				.doAction(() -> {
+					channel.sendMessage(message);
+					return true;
+				})
+				.execute();
+	}
+	
+	private void sendEmbed(IChannel channel, EmbedObject embed) {
+		new RequestBuilder(discordClient)
+				.shouldBufferRequests(true)
+				.setAsync(true)
+				.doAction(() -> {
+					channel.sendMessage(embed);
+					return true;
+				})
+				.execute();
 	}
 }

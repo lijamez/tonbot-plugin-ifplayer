@@ -19,39 +19,40 @@ import sx.blah.discord.util.EmbedBuilder;
 
 class IfPlayerListStoriesActivity implements Activity {
 
-    private static final ActivityDescriptor ACTIVITY_DESCRIPTOR = ActivityDescriptor.builder()
-            .route(ImmutableList.of("if", "list"))
-            .description("Lists the available stories for play.")
-            .build();
+	private static final ActivityDescriptor ACTIVITY_DESCRIPTOR = ActivityDescriptor.builder()
+			.route(ImmutableList.of("if", "list"))
+			.description("Lists the available stories for play.")
+			.build();
 
-    private final String prefix;
-    private final StoryLibrary storyLibrary;
+	private final BotUtils botUtils;
+	private final String prefix;
+	private final StoryLibrary storyLibrary;
 
-    @Inject
-    public IfPlayerListStoriesActivity(@Prefix String prefix, StoryLibrary storyLibrary) {
-        this.prefix = Preconditions.checkNotNull(prefix, "prefix must be non-null.");
-        this.storyLibrary = Preconditions.checkNotNull(storyLibrary, "storyLibrary must be non-null.");
-    }
+	@Inject
+	public IfPlayerListStoriesActivity(BotUtils botUtils, @Prefix String prefix, StoryLibrary storyLibrary) {
+		this.botUtils = Preconditions.checkNotNull(botUtils, "botUtils must be non-null.");
+		this.prefix = Preconditions.checkNotNull(prefix, "prefix must be non-null.");
+		this.storyLibrary = Preconditions.checkNotNull(storyLibrary, "storyLibrary must be non-null.");
+	}
 
-    @Override
-    public ActivityDescriptor getDescriptor() {
-        return ACTIVITY_DESCRIPTOR;
-    }
+	@Override
+	public ActivityDescriptor getDescriptor() {
+		return ACTIVITY_DESCRIPTOR;
+	}
 
-    @Override
-    public void enact(MessageReceivedEvent messageReceivedEvent, String args) {
-        List<File> storyFiles = storyLibrary.listAllStories();
-        List<String> storyNames = storyFiles.stream()
-        		.map(File::getName)
-        		.collect(Collectors.toList());
+	@Override
+	public void enact(MessageReceivedEvent messageReceivedEvent, String args) {
+		List<File> storyFiles = storyLibrary.listAllStories();
+		List<String> storyNames = storyFiles.stream()
+				.map(File::getName)
+				.collect(Collectors.toList());
 
-        EmbedBuilder embedBuilder = new EmbedBuilder();
+		EmbedBuilder embedBuilder = new EmbedBuilder();
 
-        embedBuilder.withTitle("Interactive Fiction Stories");
-        embedBuilder.withDesc(StringUtils.join(storyNames, "\n")
-                + "\n\nType ``" + prefix + " if play <STORY NAME>`` to play them.");
+		embedBuilder.withTitle("Interactive Fiction Stories");
+		embedBuilder.withDesc(StringUtils.join(storyNames, "\n")
+				+ "\n\nType ``" + prefix + " if play <STORY NAME>`` to play them.");
 
-
-        BotUtils.sendEmbeddedContent(messageReceivedEvent.getChannel(), embedBuilder.build());
-    }
+		botUtils.sendEmbed(messageReceivedEvent.getChannel(), embedBuilder.build());
+	}
 }

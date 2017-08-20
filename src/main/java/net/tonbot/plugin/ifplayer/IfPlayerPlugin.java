@@ -18,46 +18,53 @@ import net.tonbot.common.TonbotTechnicalFault;
 
 public class IfPlayerPlugin extends TonbotPlugin {
 
-    private Injector injector;
+	private Injector injector;
 
-    public IfPlayerPlugin(TonbotPluginArgs tonbotPluginArgs) {
-        super(tonbotPluginArgs);
+	public IfPlayerPlugin(TonbotPluginArgs tonbotPluginArgs) {
+		super(tonbotPluginArgs);
 
-        File configFile = tonbotPluginArgs.getConfigFile()
-                .orElseThrow(() -> new TonbotTechnicalFault("Config file does not exist."));
+		File configFile = tonbotPluginArgs.getConfigFile()
+				.orElseThrow(() -> new TonbotTechnicalFault("Config file does not exist."));
 
-        ObjectMapper objectMapper = new ObjectMapper();
+		ObjectMapper objectMapper = new ObjectMapper();
 
-        try {
-            Config config = objectMapper.readValue(configFile, Config.class);
+		try {
+			Config config = objectMapper.readValue(configFile, Config.class);
 
-            File storyDir = new File(config.getStoriesDir());
-            File savesDir = new File(config.getSavesDir());
+			File storyDir = new File(config.getStoriesDir());
+			File savesDir = new File(config.getSavesDir());
 
-            this.injector = Guice.createInjector(new IfPlayerModule(tonbotPluginArgs.getPrefix(), storyDir, savesDir));
-        } catch (IOException e) {
-            throw new RuntimeException("Could not read configuration file.", e);
-        }
-    }
+			this.injector = Guice.createInjector(
+					new IfPlayerModule(
+							tonbotPluginArgs.getDiscordClient(),
+							tonbotPluginArgs.getBotUtils(),
+							tonbotPluginArgs.getPrefix(),
+							storyDir,
+							savesDir));
+		} catch (IOException e) {
+			throw new RuntimeException("Could not read configuration file.", e);
+		}
+	}
 
-    @Override
-    public String getFriendlyName() {
-        return "Interactive Fiction Player";
-    }
+	@Override
+	public String getFriendlyName() {
+		return "Interactive Fiction Player";
+	}
 
-    @Override
-    public String getActionDescription() {
-        return "Play Interactive Fiction (Experimental)";
-    }
+	@Override
+	public String getActionDescription() {
+		return "Play Interactive Fiction (Experimental)";
+	}
 
-    @Override
-    public Set<Activity> getActivities() {
-        return injector.getInstance(Key.get(new TypeLiteral<Set<Activity>>() {}));
-    }
+	@Override
+	public Set<Activity> getActivities() {
+		return injector.getInstance(Key.get(new TypeLiteral<Set<Activity>>() {
+		}));
+	}
 
-    @Override
-    public Set<Object> getRawEventListeners() {
-        IfPlayerSendLineListener sendLineListener = injector.getInstance(IfPlayerSendLineListener.class);
-        return ImmutableSet.of(sendLineListener);
-    }
+	@Override
+	public Set<Object> getRawEventListeners() {
+		IfPlayerSendLineListener sendLineListener = injector.getInstance(IfPlayerSendLineListener.class);
+		return ImmutableSet.of(sendLineListener);
+	}
 }
