@@ -23,8 +23,10 @@ public class IfPlayerPlugin extends TonbotPlugin {
 	public IfPlayerPlugin(TonbotPluginArgs tonbotPluginArgs) {
 		super(tonbotPluginArgs);
 
-		File configFile = tonbotPluginArgs.getConfigFile()
-				.orElseThrow(() -> new TonbotTechnicalFault("Config file does not exist."));
+		File configFile = tonbotPluginArgs.getConfigFile();
+		if (!configFile.exists()) {
+			throw new TonbotTechnicalFault("Config file does not exist.");
+		}
 
 		ObjectMapper objectMapper = new ObjectMapper();
 
