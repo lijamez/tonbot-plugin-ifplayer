@@ -11,7 +11,7 @@ import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedE
 class IfPlayerPlayStoryActivity implements Activity {
 
     private static final ActivityDescriptor ACTIVITY_DESCRIPTOR = ActivityDescriptor.builder()
-            .route(ImmutableList.of("if", "play"))
+            .route("if play")
             .parameters(ImmutableList.of("story name"))
             .description("Plays a story in the current channel.")
             .build();

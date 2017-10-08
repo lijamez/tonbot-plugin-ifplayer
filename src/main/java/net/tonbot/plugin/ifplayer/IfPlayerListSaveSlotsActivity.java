@@ -1,7 +1,6 @@
 package net.tonbot.plugin.ifplayer;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 
 import net.tonbot.common.Activity;
@@ -12,7 +11,7 @@ import sx.blah.discord.handle.obj.IChannel;
 class IfPlayerListSaveSlotsActivity implements Activity {
 
 	private static final ActivityDescriptor ACTIVITY_DESCRIPTOR = ActivityDescriptor.builder()
-			.route(ImmutableList.of("if", "slots"))
+			.route("if slots")
 			.description("Lists the save slots for the current story.")
 			.build();
 

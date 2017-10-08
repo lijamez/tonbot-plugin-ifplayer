@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 
 import net.tonbot.common.Activity;
@@ -20,7 +19,7 @@ import sx.blah.discord.util.EmbedBuilder;
 class IfPlayerListStoriesActivity implements Activity {
 
 	private static final ActivityDescriptor ACTIVITY_DESCRIPTOR = ActivityDescriptor.builder()
-			.route(ImmutableList.of("if", "list"))
+			.route("if list")
 			.description("Lists the available stories for play.")
 			.build();
 

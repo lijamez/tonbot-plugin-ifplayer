@@ -1,7 +1,6 @@
 package net.tonbot.plugin.ifplayer;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 
 import net.tonbot.common.Activity;
@@ -13,7 +12,7 @@ import sx.blah.discord.util.EmbedBuilder;
 class IfPlayerControlsActivity implements Activity {
 
 	private static final ActivityDescriptor ACTIVITY_DESCRIPTOR = ActivityDescriptor.builder()
-			.route(ImmutableList.of("if", "controls"))
+			.route("if controls")
 			.description("Displays information about controls.")
 			.build();
 
