@@ -14,7 +14,7 @@ class IfPlayerSetSaveSlotActivity implements Activity {
 
 	private static final ActivityDescriptor ACTIVITY_DESCRIPTOR = ActivityDescriptor.builder()
 			.route("if slot")
-			.parameters(ImmutableList.of("slot number"))
+			.parameters(ImmutableList.of("<slot number>"))
 			.description("Picks a save slot for the current story.")
 			.build();
 

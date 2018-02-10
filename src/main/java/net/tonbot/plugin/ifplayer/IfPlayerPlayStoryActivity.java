@@ -12,7 +12,7 @@ class IfPlayerPlayStoryActivity implements Activity {
 
     private static final ActivityDescriptor ACTIVITY_DESCRIPTOR = ActivityDescriptor.builder()
             .route("if play")
-            .parameters(ImmutableList.of("story name"))
+            .parameters(ImmutableList.of("<story name>"))
             .description("Plays a story in the current channel.")
             .build();
 
