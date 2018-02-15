@@ -6,15 +6,14 @@ import com.google.inject.Inject;
 import net.tonbot.common.Activity;
 import net.tonbot.common.ActivityDescriptor;
 import net.tonbot.common.BotUtils;
+import net.tonbot.common.Enactable;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.util.EmbedBuilder;
 
 class IfPlayerControlsActivity implements Activity {
 
-	private static final ActivityDescriptor ACTIVITY_DESCRIPTOR = ActivityDescriptor.builder()
-			.route("if controls")
-			.description("Displays information about controls.")
-			.build();
+	private static final ActivityDescriptor ACTIVITY_DESCRIPTOR = ActivityDescriptor.builder().route("if controls")
+			.description("Displays information about controls.").build();
 
 	private final BotUtils botUtils;
 
@@ -28,8 +27,8 @@ class IfPlayerControlsActivity implements Activity {
 		return ACTIVITY_DESCRIPTOR;
 	}
 
-	@Override
-	public void enact(MessageReceivedEvent messageReceivedEvent, String args) {
+	@Enactable
+	public void enact(MessageReceivedEvent messageReceivedEvent) {
 		EmbedBuilder embedBuilder = new EmbedBuilder();
 		embedBuilder.withTitle("Interactive Fiction Player Controls");
 		embedBuilder.withDescription("When you are playing a story, simply enter the responses in the channel.\n\n"

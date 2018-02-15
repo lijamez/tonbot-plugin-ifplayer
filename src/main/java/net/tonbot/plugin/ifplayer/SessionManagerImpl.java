@@ -24,9 +24,7 @@ class SessionManagerImpl implements SessionManager {
 	 *            {@link SaveManager}. Non-null.
 	 */
 	@Inject
-	public SessionManagerImpl(
-			IDiscordClient discordClient,
-			SaveManager saveManager) {
+	public SessionManagerImpl(IDiscordClient discordClient, SaveManager saveManager) {
 		this.discordClient = Preconditions.checkNotNull(discordClient, "discordClient must be non-null.");
 		this.saveManager = Preconditions.checkNotNull(saveManager, "saveManager must be non-null.");
 		this.onSavedCallback = new OnSavedCallback() {
@@ -60,13 +58,7 @@ class SessionManagerImpl implements SessionManager {
 
 		String sessionName = story.getName();
 
-		Session session = new Session(
-				sessionKey, 
-				sessionName, 
-				story, 
-				saveFile, 
-				channel, 
-				onSavedCallback,
+		Session session = new Session(sessionKey, sessionName, story, saveFile, channel, onSavedCallback,
 				new ScreenStateRenderer(discordClient));
 
 		sessions.put(sessionKey, session);

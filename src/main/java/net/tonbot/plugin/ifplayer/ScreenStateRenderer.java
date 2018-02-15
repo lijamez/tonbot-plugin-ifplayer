@@ -42,8 +42,7 @@ class ScreenStateRenderer {
 	@Inject
 	public ScreenStateRenderer(IDiscordClient discordClient) {
 		this.discordClient = Preconditions.checkNotNull(discordClient, "discordClient must be non-null.");
-		this.lastTopic = Topic.builder()
-				.build();
+		this.lastTopic = Topic.builder().build();
 	}
 
 	/**
@@ -112,14 +111,10 @@ class ScreenStateRenderer {
 		String output = discordMessageBuffer.toString();
 
 		if (!StringUtils.isBlank(output)) {
-			new RequestBuilder(discordClient)
-					.shouldBufferRequests(true)
-					.setAsync(true)
-					.doAction(() -> {
-						channel.sendMessage(output);
-						return true;
-					})
-					.execute();
+			new RequestBuilder(discordClient).shouldBufferRequests(true).setAsync(true).doAction(() -> {
+				channel.sendMessage(output);
+				return true;
+			}).execute();
 		} else {
 			LOG.warn("Screens are blank.");
 		}
@@ -129,12 +124,10 @@ class ScreenStateRenderer {
 		StringBuffer sb = new StringBuffer();
 
 		if (topic.getPlayingStoryName() != null) {
-			sb.append("Now playing: ")
-					.append(topic.getPlayingStoryName());
+			sb.append("Now playing: ").append(topic.getPlayingStoryName());
 
 			if (topic.getSaveSlot() != null) {
-				sb.append("\u3000\u3000Save slot ")
-						.append(topic.getSaveSlot());
+				sb.append("\u3000\u3000Save slot ").append(topic.getSaveSlot());
 			}
 
 			StringBuffer statusLineBuffer = new StringBuffer();
@@ -144,8 +137,7 @@ class ScreenStateRenderer {
 			}
 
 			if (topic.getStatusLineScoreOrTime() != null) {
-				statusLineBuffer.append("\u3000\u3000")
-						.append(topic.getStatusLineScoreOrTime());
+				statusLineBuffer.append("\u3000\u3000").append(topic.getStatusLineScoreOrTime());
 			}
 
 			if (statusLineBuffer.length() > 0) {

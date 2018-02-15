@@ -9,14 +9,12 @@ import lombok.Data;
 @Data
 class Config {
 
-    private final String storiesDir;
-    private final String savesDir;
+	private final String storiesDir;
+	private final String savesDir;
 
-    @JsonCreator
-    public Config(
-            @JsonProperty("storiesDir") String storiesDir,
-            @JsonProperty("savesDir") String savesDir) {
-        this.storiesDir = Preconditions.checkNotNull(storiesDir, "storiesDir must be non-null.");
-        this.savesDir = Preconditions.checkNotNull(savesDir, "savesDir must be non-null.");
-    }
+	@JsonCreator
+	public Config(@JsonProperty("storiesDir") String storiesDir, @JsonProperty("savesDir") String savesDir) {
+		this.storiesDir = Preconditions.checkNotNull(storiesDir, "storiesDir must be non-null.");
+		this.savesDir = Preconditions.checkNotNull(savesDir, "savesDir must be non-null.");
+	}
 }

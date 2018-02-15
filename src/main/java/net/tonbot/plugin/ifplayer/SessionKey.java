@@ -7,5 +7,5 @@ import lombok.Data;
 @Builder
 class SessionKey {
 
-    private final long channelId;
+	private final long channelId;
 }

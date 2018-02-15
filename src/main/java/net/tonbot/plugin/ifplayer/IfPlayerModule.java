@@ -55,14 +55,10 @@ class IfPlayerModule extends AbstractModule {
 
 	@Provides
 	@Singleton
-	Set<Activity> activities(
-			IfPlayerListStoriesActivity listStoriesActivity,
-			IfPlayerPlayStoryActivity playStoryActivity,
-			IfPlayerStopStoryActivity stopStoryActivity,
-			IfPlayerControlsActivity controlsActivity,
-			IfPlayerListSaveSlotsActivity listSaveSlotsActivity,
-			IfPlayerSetSaveSlotActivity setSaveSlotActivity,
-			IfPlayerDeleteSaveSlotActivity deleteSaveSlotActivity) {
+	Set<Activity> activities(IfPlayerListStoriesActivity listStoriesActivity,
+			IfPlayerPlayStoryActivity playStoryActivity, IfPlayerStopStoryActivity stopStoryActivity,
+			IfPlayerControlsActivity controlsActivity, IfPlayerListSaveSlotsActivity listSaveSlotsActivity,
+			IfPlayerSetSaveSlotActivity setSaveSlotActivity, IfPlayerDeleteSaveSlotActivity deleteSaveSlotActivity) {
 		return ImmutableSet.of(listStoriesActivity, playStoryActivity, stopStoryActivity, controlsActivity,
 				listSaveSlotsActivity, setSaveSlotActivity, deleteSaveSlotActivity);
 	}

@@ -14,44 +14,42 @@ import sx.blah.discord.util.MessageTokenizer;
 
 class IfPlayerSendLineListener {
 
-    private final String prefix;
-    private final SessionOrchestrator sessionOrchestrator;
+	private final String prefix;
+	private final SessionOrchestrator sessionOrchestrator;
 
-    @Inject
-    public IfPlayerSendLineListener(
-    		@Prefix String prefix, 
-    		SessionOrchestrator sessionOrchestrator) {
-        this.prefix = Preconditions.checkNotNull(prefix, "prefix must be non-null.");
-        this.sessionOrchestrator = Preconditions.checkNotNull(sessionOrchestrator, "sessionOrchestrator must be non-null.");
-    }
+	@Inject
+	public IfPlayerSendLineListener(@Prefix String prefix, SessionOrchestrator sessionOrchestrator) {
+		this.prefix = Preconditions.checkNotNull(prefix, "prefix must be non-null.");
+		this.sessionOrchestrator = Preconditions.checkNotNull(sessionOrchestrator,
+				"sessionOrchestrator must be non-null.");
+	}
 
-    @EventSubscriber
-    public void onMessageReceived(MessageReceivedEvent messageReceivedEvent) {
-    		
-    		if (shouldMessageBeIgnored(messageReceivedEvent.getMessage())) {
-    			return;
-    		}
+	@EventSubscriber
+	public void onMessageReceived(MessageReceivedEvent messageReceivedEvent) {
 
-        String input = messageReceivedEvent.getMessage().getContent();
-        sessionOrchestrator.advance(input, messageReceivedEvent.getChannel(), messageReceivedEvent.getAuthor().getName());
-    }
-    
-    private boolean shouldMessageBeIgnored(IMessage message) {
-    		String originalMessage = message.getContent();
-    	
-    		if (StringUtils.isBlank(originalMessage)) {
-    			return true;
-    		}
-    	
+		if (shouldMessageBeIgnored(messageReceivedEvent.getMessage())) {
+			return;
+		}
+
+		String input = messageReceivedEvent.getMessage().getContent();
+		sessionOrchestrator.advance(input, messageReceivedEvent.getChannel(),
+				messageReceivedEvent.getAuthor().getName());
+	}
+
+	private boolean shouldMessageBeIgnored(IMessage message) {
+		String originalMessage = message.getContent();
+
+		if (StringUtils.isBlank(originalMessage)) {
+			return true;
+		}
+
 		MessageTokenizer tokenizer = new MessageTokenizer(message);
-		
-		// For reasons only known to Discord devs, @everyone is not a mention so we need to check it explicitly.
+
+		// For reasons only known to Discord devs, @everyone is not a mention so we need
+		// to check it explicitly.
 		// hasNextEmoji doesn't return true for "standard" emojis, such as :D
-		return tokenizer.hasNextEmoji() 
-				|| tokenizer.hasNextMention() 
-				|| tokenizer.hasNextInvite() 
-				|| originalMessage.contains("@everyone")
-				|| originalMessage.startsWith(prefix)
+		return tokenizer.hasNextEmoji() || tokenizer.hasNextMention() || tokenizer.hasNextInvite()
+				|| originalMessage.contains("@everyone") || originalMessage.startsWith(prefix)
 				|| !EmojiParser.removeAllEmojis(originalMessage).equals(originalMessage);
-    }
+	}
 }

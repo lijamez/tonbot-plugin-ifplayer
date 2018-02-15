@@ -39,36 +39,12 @@ class GameMachine implements ScreenModel, OutputStream {
 	 * these keycodes.
 	 */
 	private static final Map<String, Integer> CHAR_MAPPING = new ImmutableMap.Builder<String, Integer>()
-			.put("<enter>", 13)
-			.put("<return>", 13)
-			.put("<esc>", 27)
-			.put("<up>", 129)
-			.put("<down>", 130)
-			.put("<left>", 131)
-			.put("<right>", 132)
-			.put("<f1>", 133)
-			.put("<f2>", 134)
-			.put("<f3>", 135)
-			.put("<f4>", 136)
-			.put("<f5>", 137)
-			.put("<f6>", 138)
-			.put("<f7>", 139)
-			.put("<f8>", 140)
-			.put("<f9>", 141)
-			.put("<f10>", 142)
-			.put("<f11>", 143)
-			.put("<f12>", 144)
-			.put("<num0>", 145)
-			.put("<num1>", 146)
-			.put("<num2>", 147)
-			.put("<num3>", 148)
-			.put("<num4>", 149)
-			.put("<num5>", 150)
-			.put("<num6>", 151)
-			.put("<num7>", 152)
-			.put("<num8>", 153)
-			.put("<num9>", 154)
-			.build();
+			.put("<enter>", 13).put("<return>", 13).put("<esc>", 27).put("<up>", 129).put("<down>", 130)
+			.put("<left>", 131).put("<right>", 132).put("<f1>", 133).put("<f2>", 134).put("<f3>", 135).put("<f4>", 136)
+			.put("<f5>", 137).put("<f6>", 138).put("<f7>", 139).put("<f8>", 140).put("<f9>", 141).put("<f10>", 142)
+			.put("<f11>", 143).put("<f12>", 144).put("<num0>", 145).put("<num1>", 146).put("<num2>", 147)
+			.put("<num3>", 148).put("<num4>", 149).put("<num5>", 150).put("<num6>", 151).put("<num7>", 152)
+			.put("<num8>", 153).put("<num9>", 154).build();
 
 	private static final int UPPER_WINDOW_WIDTH = 100;
 
@@ -134,9 +110,10 @@ class GameMachine implements ScreenModel, OutputStream {
 
 		this.saveFile = saveFile;
 	}
-	
+
 	/**
 	 * Gets the save file.
+	 * 
 	 * @return {@link SaveFile}
 	 */
 	public Optional<SaveFile> getSaveFile() {
@@ -162,7 +139,7 @@ class GameMachine implements ScreenModel, OutputStream {
 	 */
 	public Optional<ScreenState> takeTurn(String input, String username) {
 		Preconditions.checkNotNull(username, "username must be non-null.");
-		
+
 		if (this.manuallyStopped || vm.state().runState() == ZMachineRunStates.Halted()) {
 			throw new GameMachineException("This GameMachine has been stopped.");
 		}
@@ -188,9 +165,7 @@ class GameMachine implements ScreenModel, OutputStream {
 
 			if (isSavingToFile) {
 				// Saving finished
-				SaveFileMetadata md = SaveFileMetadata.builder()
-						.createdBy(username)
-						.creationDate(ZonedDateTime.now())
+				SaveFileMetadata md = SaveFileMetadata.builder().createdBy(username).creationDate(ZonedDateTime.now())
 						.build();
 				this.saveFile = fileSavedCallback.getOnSavedCallback(channelId, saveFile, md);
 				isSavingToFile = false;
@@ -208,9 +183,7 @@ class GameMachine implements ScreenModel, OutputStream {
 				CharacterMatrix upperWindow = windows.get(UPPER_WINDOW_INDEX);
 				CharacterMatrix lowerWindow = windows.get(LOWER_WINDOW_INDEX);
 
-				nextScreenState = builder.windowContents(ImmutableList.of(
-						upperWindow.render(),
-						lowerWindow.render()))
+				nextScreenState = builder.windowContents(ImmutableList.of(upperWindow.render(), lowerWindow.render()))
 						.build();
 
 				upperWindow.reset();

@@ -36,13 +36,8 @@ public class IfPlayerPlugin extends TonbotPlugin {
 			File storyDir = new File(config.getStoriesDir());
 			File savesDir = new File(config.getSavesDir());
 
-			this.injector = Guice.createInjector(
-					new IfPlayerModule(
-							tonbotPluginArgs.getDiscordClient(),
-							tonbotPluginArgs.getBotUtils(),
-							tonbotPluginArgs.getPrefix(),
-							storyDir,
-							savesDir));
+			this.injector = Guice.createInjector(new IfPlayerModule(tonbotPluginArgs.getDiscordClient(),
+					tonbotPluginArgs.getBotUtils(), tonbotPluginArgs.getPrefix(), storyDir, savesDir));
 		} catch (IOException e) {
 			throw new RuntimeException("Could not read configuration file.", e);
 		}

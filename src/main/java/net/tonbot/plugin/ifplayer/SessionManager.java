@@ -7,26 +7,36 @@ import sx.blah.discord.handle.obj.IChannel;
 
 interface SessionManager {
 
-    /**
-     * Creates a {@link Session} with the name of a story. Overwrites any existing session.
-     * @param sessionKey {@link SessionKey}. Non-null.
-     * @param channel {@link IChannel}. Non-null.
-     * @param story The story. Non-null.
-     * @return {@link Session}. Non-null.
-     * @throws TonbotBusinessException if this method couldn't pick a story from the name.
-     */
-    Session createSession(SessionKey sessionKey, IChannel channel, Story story);
+	/**
+	 * Creates a {@link Session} with the name of a story. Overwrites any existing
+	 * session.
+	 * 
+	 * @param sessionKey
+	 *            {@link SessionKey}. Non-null.
+	 * @param channel
+	 *            {@link IChannel}. Non-null.
+	 * @param story
+	 *            The story. Non-null.
+	 * @return {@link Session}. Non-null.
+	 * @throws TonbotBusinessException
+	 *             if this method couldn't pick a story from the name.
+	 */
+	Session createSession(SessionKey sessionKey, IChannel channel, Story story);
 
-    /**
-     * Gets a {@link Session} by its {@link SessionKey}.
-     * @param sessionKey {@link SessionKey}. Non-null.
-     * @return A {@link Session}.
-     */
-    Optional<Session> getSession(SessionKey sessionKey);
+	/**
+	 * Gets a {@link Session} by its {@link SessionKey}.
+	 * 
+	 * @param sessionKey
+	 *            {@link SessionKey}. Non-null.
+	 * @return A {@link Session}.
+	 */
+	Optional<Session> getSession(SessionKey sessionKey);
 
-    /**
-     * Removes a {@link Session}.
-     * @param sessionKey The {@link SessionKey} of the session to remove. Non-null.
-     */
-    void removeSession(SessionKey sessionKey);
+	/**
+	 * Removes a {@link Session}.
+	 * 
+	 * @param sessionKey
+	 *            The {@link SessionKey} of the session to remove. Non-null.
+	 */
+	void removeSession(SessionKey sessionKey);
 }
