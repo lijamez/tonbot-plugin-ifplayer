@@ -9,7 +9,7 @@ import net.tonbot.common.Param;
 
 @EqualsAndHashCode
 @ToString()
-public class IfPlayerPlayStoryRequest {
+class IfPlayerPlayStoryRequest {
 
 	@Getter
 	@Param(name = "story name", ordinal = 0, description = "The name of the story to play.")

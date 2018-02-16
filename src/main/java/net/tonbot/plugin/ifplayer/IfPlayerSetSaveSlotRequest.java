@@ -9,7 +9,7 @@ import net.tonbot.common.Param;
 
 @EqualsAndHashCode
 @ToString()
-public class IfPlayerSetSaveSlotRequest {
+class IfPlayerSetSaveSlotRequest {
 
 	@Getter
 	@Param(name = "slot number", ordinal = 0, description = "The slot number to set.")
