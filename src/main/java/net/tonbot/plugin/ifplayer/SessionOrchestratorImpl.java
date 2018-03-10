@@ -2,9 +2,7 @@ package net.tonbot.plugin.ifplayer;
 
 import java.io.File;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,9 +12,7 @@ import com.google.inject.Inject;
 
 import net.tonbot.common.TonbotBusinessException;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.util.EmbedBuilder;
 import sx.blah.discord.util.RequestBuilder;
 
 class SessionOrchestratorImpl implements SessionOrchestrator {
@@ -170,52 +166,6 @@ class SessionOrchestratorImpl implements SessionOrchestrator {
 	}
 
 	@Override
-	public void listSlots(IChannel channel) {
-		Session session = getSession(channel);
-
-		if (session == null) {
-			throw new TonbotBusinessException("You need to play a story first.");
-		}
-
-		Story story = session.getGameMachine().getStory();
-
-		List<SaveFile> saveFiles = saveManager.getSaveFiles(channel.getLongID(), story);
-		Map<Integer, SaveFile> saveMap = saveFiles.stream().collect(Collectors.toMap(sf -> sf.getSlot(), sf -> sf));
-
-		SaveFile currentSaveFile = session.getGameMachine().getSaveFile().orElse(null);
-
-		EmbedBuilder embedBuilder = new EmbedBuilder();
-		embedBuilder.appendDescription(
-				"Save slots for **" + story.getName() + "** in channel **" + channel.getName() + "**:");
-
-		for (int i = 0; i < saveManager.getMaxSlots(); i++) {
-			StringBuilder contentsBuilder = new StringBuilder();
-			SaveFile saveFileInSlot = saveMap.get(i);
-
-			if (saveFileInSlot == null) {
-				contentsBuilder.append("Free");
-			} else if (saveFileInSlot.getMetadata().isPresent()) {
-				SaveFileMetadata metadata = saveFileInSlot.getMetadata().get();
-				contentsBuilder.append("Saved by: ").append(metadata.getCreatedBy()).append("\n").append("Saved on: ")
-						.append(metadata.getCreationDate().toString());
-			} else {
-				contentsBuilder.append("Occupied");
-			}
-
-			StringBuilder topicBuilder = new StringBuilder();
-			topicBuilder.append("Slot ").append(i);
-
-			if (currentSaveFile != null && currentSaveFile.getSlot() == i) {
-				topicBuilder.append(" :point_left:");
-			}
-
-			embedBuilder.appendField(topicBuilder.toString(), contentsBuilder.toString(), false);
-		}
-
-		this.sendEmbed(channel, embedBuilder.build());
-	}
-
-	@Override
 	public void deleteSaveSlot(IChannel channel, int slotNumber) {
 		if (slotNumber < 0 || slotNumber >= saveManager.getMaxSlots()) {
 			throw new TonbotBusinessException("Invalid slot number. Must be from 0-" + (saveManager.getMaxSlots() - 1));
@@ -235,13 +185,6 @@ class SessionOrchestratorImpl implements SessionOrchestrator {
 	private void sendMessage(IChannel channel, String message) {
 		new RequestBuilder(discordClient).shouldBufferRequests(true).setAsync(true).doAction(() -> {
 			channel.sendMessage(message);
-			return true;
-		}).execute();
-	}
-
-	private void sendEmbed(IChannel channel, EmbedObject embed) {
-		new RequestBuilder(discordClient).shouldBufferRequests(true).setAsync(true).doAction(() -> {
-			channel.sendMessage(embed);
 			return true;
 		}).execute();
 	}

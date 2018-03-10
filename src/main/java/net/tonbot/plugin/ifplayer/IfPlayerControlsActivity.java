@@ -1,5 +1,7 @@
 package net.tonbot.plugin.ifplayer;
 
+import java.awt.Color;
+
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 
@@ -16,10 +18,12 @@ class IfPlayerControlsActivity implements Activity {
 			.description("Displays information about controls.").build();
 
 	private final BotUtils botUtils;
+	private final Color accentColor;
 
 	@Inject
-	public IfPlayerControlsActivity(BotUtils botUtils) {
+	public IfPlayerControlsActivity(BotUtils botUtils, Color accentColor) {
 		this.botUtils = Preconditions.checkNotNull(botUtils, "botUtils must be non-null.");
+		this.accentColor = Preconditions.checkNotNull(accentColor, "accentColor must be non-null.");
 	}
 
 	@Override
@@ -42,6 +46,7 @@ class IfPlayerControlsActivity implements Activity {
 		embedBuilder.appendField("Function keys", "``<f#>``    e.g: ``<f4>``, ``<f12>``", false);
 		embedBuilder.appendField("Numpad keys", "``<num#>``    e.g: ``<num2>``", false);
 		embedBuilder.appendField("Escape", "``<esc>``", false);
+		embedBuilder.withColor(accentColor);
 
 		botUtils.sendEmbed(messageReceivedEvent.getChannel(), embedBuilder.build());
 	}

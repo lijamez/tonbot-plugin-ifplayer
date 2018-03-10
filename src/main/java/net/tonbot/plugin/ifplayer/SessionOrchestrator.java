@@ -65,14 +65,6 @@ interface SessionOrchestrator {
 	boolean hasSession(IChannel channel);
 
 	/**
-	 * Lists the slots for the current story. No-op if there is no session.
-	 * 
-	 * @param channel
-	 *            {@link IChannel}. Non-null.
-	 */
-	void listSlots(IChannel channel);
-
-	/**
 	 * Deletes a save slot for the current story. No-op if there is no session.
 	 * 
 	 * @param channel

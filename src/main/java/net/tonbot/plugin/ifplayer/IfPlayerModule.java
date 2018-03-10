@@ -1,5 +1,6 @@
 package net.tonbot.plugin.ifplayer;
 
+import java.awt.Color;
 import java.io.File;
 import java.util.Set;
 
@@ -24,11 +25,13 @@ class IfPlayerModule extends AbstractModule {
 	private final String prefix;
 	private final File storyDir;
 	private final File saveDir;
+	private final Color accentColor;
 
-	public IfPlayerModule(IDiscordClient discordClient, BotUtils botUtils, String prefix, File storyDir, File saveDir) {
+	public IfPlayerModule(IDiscordClient discordClient, BotUtils botUtils, String prefix, Color accentColor, File storyDir, File saveDir) {
 		this.discordClient = Preconditions.checkNotNull(discordClient, "discordClient must be non-null.");
 		this.botUtils = Preconditions.checkNotNull(botUtils, "botUtils must be non-null.");
 		this.prefix = Preconditions.checkNotNull(prefix, "prefix must be non-null.");
+		this.accentColor = Preconditions.checkNotNull(accentColor, "accentColor must be non-null.");
 
 		Preconditions.checkNotNull(storyDir, "storyDir must be non-null.");
 		Preconditions.checkArgument(storyDir.isDirectory(), "storyDir must be a directory.");
@@ -44,6 +47,7 @@ class IfPlayerModule extends AbstractModule {
 		bind(IDiscordClient.class).toInstance(discordClient);
 		bind(BotUtils.class).toInstance(botUtils);
 		bind(String.class).annotatedWith(Prefix.class).toInstance(prefix);
+		bind(Color.class).toInstance(accentColor);
 		bind(File.class).annotatedWith(StoryDir.class).toInstance(storyDir);
 		bind(File.class).annotatedWith(SaveDir.class).toInstance(saveDir);
 		bind(Integer.class).annotatedWith(MaxSaveSlots.class).toInstance(MAX_SAVE_SLOTS);
