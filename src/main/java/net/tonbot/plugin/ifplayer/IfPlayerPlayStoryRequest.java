@@ -12,7 +12,7 @@ import net.tonbot.common.Param;
 class IfPlayerPlayStoryRequest {
 
 	@Getter
-	@Param(name = "story name", ordinal = 0, description = "The name of the story to play.")
+	@Param(name = "story name", ordinal = 0, description = "The name of the story to play.", captureRemaining = true)
 	@Nonnull
 	private String storyName;
 }
