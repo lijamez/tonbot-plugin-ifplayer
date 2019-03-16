@@ -30,8 +30,8 @@ dependencies {
 
     extraLibs files('lib/zcode-assembly-0.1-SNAPSHOT.jar')
 
-    implementation group: 'com.google.inject', name: 'guice', version: '4.1.0'
-    implementation group: 'com.google.guava', name: 'guava', version: '24.0-jre'
+    implementation group: 'com.google.inject', name: 'guice', version: '4.2.2'
+    implementation group: 'com.google.guava', name: 'guava', version: '27.1-jre'
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
 	
     implementation 'com.vdurmont:emoji-java:4.0.0'
